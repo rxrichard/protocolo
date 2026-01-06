@@ -1,546 +1,419 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protocolo: O TANQUE DE GUERRA</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&family=Inter:wght@400;600;800&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a; /* Slate 950 */
-            color: #e2e8f0;
-        }
-        
-        h1, h2, h3, .military-font {
-            font-family: 'Chakra Petch', sans-serif;
-            text-transform: uppercase;
-        }
+import React, { useState, useEffect } from 'react';
+import { 
+  Dumbbell, 
+  Activity, 
+  Calendar, 
+  ChevronRight, 
+  Save, 
+  Trophy, 
+  AlertCircle,
+  TrendingUp,
+  Info,
+  Share2,
+  FileSpreadsheet,
+  Check,
+  Copy
+} from 'lucide-react';
 
-        .tab-active {
-            background-color: #dc2626; /* Red 600 */
-            color: white;
-            border-bottom: 2px solid white;
-        }
+// --- ÍCONES PERSONALIZADOS ---
+const MuscleIcon = ({ group }) => {
+  const colors = {
+    peito: "text-blue-400",
+    costas: "text-emerald-400",
+    pernas: "text-orange-400",
+    ombros: "text-purple-400",
+    bracos: "text-pink-400",
+    cardio: "text-cyan-400"
+  };
+  return <Dumbbell className={colors[group] || "text-slate-400"} size={20} />;
+};
 
-        .tab-inactive {
-            background-color: #1e293b; /* Slate 800 */
-            color: #94a3b8;
-        }
+const WorkoutApp = () => {
+  const [activeDay, setActiveDay] = useState('segunda');
+  const [progress, setProgress] = useState({});
+  const [weights, setWeights] = useState({});
+  const [copyFeedback, setCopyFeedback] = useState(null); // 'whatsapp' | 'excel' | null
 
-        .exercise-card {
-            transition: all 0.3s ease;
-        }
-        
-        .exercise-card.completed {
-            opacity: 0.5;
-            border-color: #22c55e; /* Green 500 */
-            background-color: #064e3b;
-        }
+  // --- ESTRUTURA DO TREINO ---
+  const workoutPlan = {
+    segunda: {
+      title: "Peito & Tríceps (Carga)",
+      focus: "Força e Tensão Mecânica",
+      groups: ["peito", "bracos"],
+      exercises: [
+        { id: 's1', name: "Supino Inclinado com Halteres", sets: "4", reps: "8-10", note: "Banco a 30º. Protege o ombro e foca no peito superior." },
+        { id: 's2', name: "Supino Máquina Articulado", sets: "4", reps: "8-12", note: "Foque em esmagar o peito no topo. Seguro para coluna." },
+        { id: 's3', name: "Crossover Polia Alta", sets: "3", reps: "12-15", note: "Foco na parte inferior do peito." },
+        { id: 's4', name: "Tríceps Testa (Halteres)", sets: "4", reps: "10-12", note: "Deitado no banco. Cotovelos fechados." },
+        { id: 's5', name: "Tríceps Corda", sets: "4", reps: "12-15", note: "Abra a corda no final do movimento." },
+      ]
+    },
+    terca: {
+      title: "Costas & Bíceps (Largura)",
+      focus: "Volume e Pump",
+      groups: ["costas", "bracos"],
+      exercises: [
+        { id: 't1', name: "Puxada Alta (Pegada Aberta)", sets: "4", reps: "10-12", note: "Coluna travada, puxe até o queixo." },
+        { id: 't2', name: "Remada Máquina (Peito Apoiado)", sets: "4", reps: "10-12", note: "CRUCIAL: Peito apoiado para não usar a hérnia." },
+        { id: 't3', name: "Pulldown com Corda", sets: "3", reps: "15", note: "Braços esticados, isola a dorsal." },
+        { id: 't4', name: "Rosca Scott (Máquina)", sets: "4", reps: "10-12", note: "Isolamento total. Não tire o tríceps do apoio." },
+        { id: 't5', name: "Rosca Martelo Sentado", sets: "3", reps: "12", note: "Alternado. Foca no braquial (largura do braço)." },
+      ]
+    },
+    quarta: {
+      title: "Pernas (Segurança)",
+      focus: "Manutenção & Definição",
+      groups: ["pernas"],
+      exercises: [
+        { id: 'q1', name: "Cadeira Extensora", sets: "5", reps: "15-20", note: "Pré-exaustão. Segure 1s no topo." },
+        { id: 'q2', name: "Leg Press 45º", sets: "4", reps: "10-12", note: "ATENÇÃO: Não tire a lombar do banco. Amplitude controlada." },
+        { id: 'q3', name: "Mesa Flexora", sets: "4", reps: "12-15", note: "Contraia bem o posterior." },
+        { id: 'q4', name: "Gemeos em pé", sets: "5", reps: "15-20", note: "Movimento completo." },
+      ]
+    },
+    quinta: {
+      title: "Peito & Ombros (Volume)",
+      focus: "Hipertrofia Metabólica",
+      groups: ["peito", "ombros"],
+      exercises: [
+        { id: 'qi1', name: "Supino Reto com Halteres", sets: "4", reps: "10-12", note: "Alongue bem na descida." },
+        { id: 'qi2', name: "Peck Deck (Voador)", sets: "4", reps: "15", note: "Séries longas para bombear sangue." },
+        { id: 'qi3', name: "Elevação Lateral Sentado", sets: "5", reps: "12-15", note: "Faça sentado para não balançar o tronco." },
+        { id: 'qi4', name: "Desenvolvimento Máquina", sets: "3", reps: "10-12", note: "Mais seguro que barra livre." },
+        { id: 'qi5', name: "Elevação Frontal Cabo", sets: "3", reps: "12", note: "Com corda, passando por baixo das pernas." },
+      ]
+    },
+    sexta: {
+      title: "Costas & Trapézio",
+      focus: "Densidade",
+      groups: ["costas"],
+      exercises: [
+        { id: 'sx1', name: "Puxada Triângulo", sets: "4", reps: "10-12", note: "Foco no miolo das costas." },
+        { id: 'sx2', name: "Remada Baixa (Cabo)", sets: "4", reps: "12", note: "Coluna reta, use o cinto." },
+        { id: 'sx3', name: "Encolhimento com Halteres", sets: "4", reps: "15", note: "Sentado ou em pé com coluna travada." },
+        { id: 'sx4', name: "Facepull (Cabo)", sets: "4", reps: "15", note: "Para saúde do ombro e posterior." },
+      ]
+    },
+    sabado: {
+      title: "Especial Braços (Arm Day)",
+      focus: "Bíceps & Tríceps Super-set",
+      groups: ["bracos"],
+      exercises: [
+        { id: 'sb1', name: "Tríceps Polia Barra V", sets: "4", reps: "12-15", note: "Super-série com o próximo." },
+        { id: 'sb2', name: "Rosca Direta Cabo", sets: "4", reps: "12-15", note: "Cabo mantém tensão constante." },
+        { id: 'sb3', name: "Tríceps Francês Unilateral", sets: "3", reps: "12", note: "Cuidado com o cotovelo." },
+        { id: 'sb4', name: "Rosca Scott (Máquina)", sets: "3", reps: "12", note: "Apoie bem o tríceps. Foco no pico do bíceps." },
+        { id: 'sb5', name: "Rosca Inversa (Antebraço)", sets: "4", reps: "15", note: "Para engrossar o antebraço." },
+      ]
+    },
+    domingo: {
+      title: "Descanso Ativo",
+      focus: "Recuperação & Cardio",
+      groups: ["cardio"],
+      exercises: [
+        { id: 'dm1', name: "Cardio Leve (Bike Horizontal)", sets: "1", reps: "45 min", note: "Mantenha FC em 110-120bpm. Protege a lombar." },
+        { id: 'dm2', name: "Alongamento Geral", sets: "1", reps: "15 min", note: "Foco em posteriores de coxa e peitoral." },
+      ]
+    }
+  };
 
-        /* Checkbox customizado */
-        .custom-checkbox input:checked + div {
-            background-color: #22c55e;
-            border-color: #22c55e;
-        }
-        
-        /* Esconde barra de rolagem mas permite scroll */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col">
+  const days = [
+    { key: 'segunda', label: 'SEG' },
+    { key: 'terca', label: 'TER' },
+    { key: 'quarta', label: 'QUA' },
+    { key: 'quinta', label: 'QUI' },
+    { key: 'sexta', label: 'SEX' },
+    { key: 'sabado', label: 'SÁB' },
+    { key: 'domingo', label: 'DOM' },
+  ];
 
-    <!-- Header -->
-    <header class="bg-slate-900 border-b-4 border-red-600 p-6 shadow-lg sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-white tracking-widest">PROTOCOLO <span class="text-red-600">TANQUE</span></h1>
-                <p class="text-xs text-slate-400 military-font tracking-widest">PROJETO DE TRANSFORMAÇÃO EXTREMA</p>
+  // --- LÓGICA DE ESTADO ---
+  const handleWeightChange = (exerciseId, val) => {
+    setWeights(prev => ({ ...prev, [exerciseId]: val }));
+  };
+
+  const toggleSet = (exerciseId, setIndex) => {
+    const key = `${activeDay}-${exerciseId}-${setIndex}`;
+    setProgress(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  // --- LÓGICA DE CÓPIA ---
+  const copyToClipboard = (text, type) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      setCopyFeedback(type);
+      setTimeout(() => setCopyFeedback(null), 2000);
+    } catch (err) {
+      console.error('Falha ao copiar', err);
+    }
+    document.body.removeChild(textArea);
+  };
+
+  const handleWhatsAppCopy = () => {
+    const todayPlan = workoutPlan[activeDay];
+    const date = new Date().toLocaleDateString('pt-BR');
+    
+    let text = `🦾 *PROJECT TANK - ${todayPlan.title}*\n`;
+    text += `📅 Data: ${date}\n`;
+    text += `🎯 Foco: ${todayPlan.focus}\n\n`;
+
+    todayPlan.exercises.forEach(ex => {
+      let setsDone = 0;
+      for(let i=0; i<parseInt(ex.sets); i++) {
+        if(progress[`${activeDay}-${ex.id}-${i}`]) setsDone++;
+      }
+      
+      const weight = weights[ex.id] ? `${weights[ex.id]}kg` : '0kg';
+      const statusIcon = setsDone === parseInt(ex.sets) ? '✅' : (setsDone > 0 ? '⚠️' : '❌');
+      
+      text += `${statusIcon} *${ex.name}*\n`;
+      text += `   └ Carga: ${weight} | Feito: ${setsDone}/${ex.sets} séries\n\n`;
+    });
+
+    text += `🚀🚀🚀🚀🚀🚀🚀`;
+    copyToClipboard(text, 'whatsapp');
+  };
+
+  const handleExcelCopy = () => {
+    const todayPlan = workoutPlan[activeDay];
+    const date = new Date().toLocaleDateString('pt-BR');
+    
+    // Cabeçalho para colar no Excel (separado por TAB)
+    // Data | Dia | Exercício | Carga (KG) | Séries Feitas | Meta Reps
+    let text = `Data\tDia\tExercício\tCarga (KG)\tSéries Feitas\tMeta Reps\n`;
+
+    todayPlan.exercises.forEach(ex => {
+      let setsDone = 0;
+      for(let i=0; i<parseInt(ex.sets); i++) {
+        if(progress[`${activeDay}-${ex.id}-${i}`]) setsDone++;
+      }
+      
+      const weight = weights[ex.id] || '0';
+      const dayLabel = days.find(d => d.key === activeDay).label;
+      
+      text += `${date}\t${dayLabel}\t${ex.name}\t${weight}\t${setsDone}/${ex.sets}\t${ex.reps}\n`;
+    });
+
+    copyToClipboard(text, 'excel');
+  };
+
+  // --- CÁLCULO DE PROGRESSO ---
+  const currentExercises = workoutPlan[activeDay].exercises;
+  const totalSets = currentExercises.reduce((acc, ex) => acc + parseInt(ex.sets), 0);
+  const completedCount = currentExercises.reduce((acc, ex) => {
+    let count = 0;
+    for(let i=0; i<parseInt(ex.sets); i++) {
+      if(progress[`${activeDay}-${ex.id}-${i}`]) count++;
+    }
+    return acc + count;
+  }, 0);
+  const percentage = Math.round((completedCount / totalSets) * 100) || 0;
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-blue-500 selection:text-white pb-32">
+      
+      {/* HEADER */}
+      <header className="relative bg-slate-900 border-b border-slate-800 p-6 shadow-2xl">
+        <div className="absolute top-0 right-0 p-32 bg-blue-600/10 blur-[80px] rounded-full pointer-events-none"></div>
+        <div className="max-w-md mx-auto relative z-10">
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-2xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
+              PROJECT TANK <span className="text-slate-600 text-sm not-italic font-normal">2026</span>
+            </h1>
+            <Trophy className="text-yellow-500 animate-pulse" size={24} />
+          </div>
+          <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">
+            Foco: Peito & Braços • Proteção Lombar
+          </p>
+          
+          <div className="mt-6">
+            <div className="flex justify-between text-xs font-bold mb-1">
+              <span className="text-slate-400">PROGRESSO DO TREINO</span>
+              <span className="text-blue-400">{percentage}%</span>
             </div>
-            <div class="text-right hidden sm:block">
-                <p class="text-xl font-bold">4X / SEMANA</p>
-                <p class="text-xs text-red-500">SEGURANÇA TOTAL COLUNA</p>
+            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                style={{ width: `${percentage}%` }}
+              ></div>
             </div>
+          </div>
         </div>
-    </header>
+      </header>
 
-    <main class="flex-grow max-w-4xl mx-auto w-full p-4 space-y-6">
-
-        <!-- Seção de Diagnóstico e Stats -->
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Card Stats -->
-            <div class="bg-slate-800 rounded-lg p-5 border border-slate-700 shadow-xl">
-                <h2 class="text-xl font-bold text-red-500 mb-4 flex items-center gap-2">
-                    <i data-lucide="crosshair"></i> DADOS DO OPERADOR
-                </h2>
-                <div class="grid grid-cols-2 gap-4 text-sm mb-4">
-                    <div class="bg-slate-900 p-3 rounded border border-green-900/50">
-                        <span class="block text-slate-500 text-xs">PESO ATUAL</span>
-                        <span class="text-2xl font-bold text-green-400">121.8 KG</span>
-                    </div>
-                    <div class="bg-slate-900 p-3 rounded">
-                        <span class="block text-slate-500 text-xs">BÍCEPS</span>
-                        <span class="text-2xl font-bold text-white">41 CM</span>
-                    </div>
-                    <div class="bg-slate-900 p-3 rounded border border-red-900/50">
-                        <span class="block text-slate-500 text-xs">CINTURA</span>
-                        <span class="text-xl font-bold text-red-400">122.5 CM</span>
-                    </div>
-                    <div class="bg-slate-900 p-3 rounded border border-red-900/50">
-                        <span class="block text-slate-500 text-xs">DOBRA ABD</span>
-                        <span class="text-xl font-bold text-red-400">50 MM</span>
-                    </div>
-                </div>
-
-                <!-- Nova Seção: Protocolo Auxiliar -->
-                <div class="border-t border-slate-700 pt-3">
-                    <p class="text-[10px] text-slate-400 mb-2 uppercase tracking-wider font-bold">Protocolo Auxiliar (Ativo)</p>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-yellow-900/20 border border-yellow-600/30 p-2 rounded flex items-center gap-2">
-                            <i data-lucide="syringe" class="w-4 h-4 text-yellow-500"></i>
-                            <div>
-                                <span class="block text-[10px] text-yellow-500/80">DURATESTON</span>
-                                <span class="text-sm font-bold text-yellow-500">1ML / SEM</span>
-                            </div>
-                        </div>
-                        <div class="bg-orange-900/20 border border-orange-600/30 p-2 rounded flex items-center gap-2">
-                            <i data-lucide="flame" class="w-4 h-4 text-orange-500"></i>
-                            <div>
-                                <span class="block text-[10px] text-orange-500/80">CLEMBUTEROL</span>
-                                <span class="text-sm font-bold text-orange-500">2ML (Início)</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card Diagnóstico -->
-            <div class="bg-slate-800 rounded-lg p-5 border border-slate-700 shadow-xl flex flex-col justify-between">
-                <div>
-                    <h2 class="text-xl font-bold text-white mb-2">AJUSTE DE SEGURANÇA</h2>
-                    <div class="bg-red-900/30 text-red-200 text-xs p-3 rounded mb-4 border border-red-800 flex items-start gap-2">
-                        <i data-lucide="shield-alert" class="w-5 h-5 flex-shrink-0 mt-0.5"></i>
-                        <span><strong>ALERTA HÉRNIAS:</strong> Todo exercício com carga axial (peso na coluna) foi removido. Foco 100% em máquinas com apoio de costas e peito.</span>
-                    </div>
-                    <p class="text-slate-300 text-sm leading-relaxed mt-2">
-                        <strong>Novo Cardio:</strong> A caminhada foi substituída por <span class="text-blue-400 font-bold">Bicicleta Horizontal</span> (recumbente) para proteger a coluna e evitar impacto nos discos.
-                    </p>
-                </div>
-                <div class="mt-4 pt-4 border-t border-slate-700 flex gap-2">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        Zero Impacto
-                    </span>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Peso: 121.8 KG
-                    </span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Navegação dos Treinos -->
-        <div class="flex overflow-x-auto gap-2 pb-2 mb-2 no-scrollbar">
-            <button onclick="switchTab('A')" id="btn-A" class="tab-active flex-1 min-w-[100px] py-3 px-4 rounded-t-lg font-bold text-sm tracking-wide transition-colors whitespace-nowrap">
-                TREINO A
-                <span class="block text-[10px] opacity-75 font-normal">Superior (Máquina)</span>
-            </button>
-            <button onclick="switchTab('B')" id="btn-B" class="tab-inactive flex-1 min-w-[100px] py-3 px-4 rounded-t-lg font-bold text-sm tracking-wide transition-colors whitespace-nowrap">
-                TREINO B
-                <span class="block text-[10px] opacity-75 font-normal">Inferior (Seguro)</span>
-            </button>
-            <button onclick="switchTab('C')" id="btn-C" class="tab-inactive flex-1 min-w-[100px] py-3 px-4 rounded-t-lg font-bold text-sm tracking-wide transition-colors whitespace-nowrap">
-                TREINO C
-                <span class="block text-[10px] opacity-75 font-normal">Dorsal (Apoiado)</span>
-            </button>
-            <button onclick="switchTab('D')" id="btn-D" class="tab-inactive flex-1 min-w-[100px] py-3 px-4 rounded-t-lg font-bold text-sm tracking-wide transition-colors whitespace-nowrap">
-                TREINO D
-                <span class="block text-[10px] opacity-75 font-normal">Metabólico/Bike</span>
-            </button>
+      {/* SAFETY WARNING */}
+      <div className="max-w-md mx-auto p-4">
+        <div className="bg-red-900/20 border border-red-500/20 rounded-lg p-3 flex items-start gap-3">
+          <AlertCircle className="text-red-500 shrink-0" size={20} />
+          <div>
+            <h3 className="text-red-400 font-bold text-xs uppercase mb-1">Protocolo de Segurança</h3>
+            <p className="text-xs text-red-200/70">
+              Evite carga axial para preservar a coluna.
+            </p>
+          </div>
         </div>
+      </div>
 
-        <!-- Conteúdo dos Treinos -->
-        <div id="workout-content" class="bg-slate-800 rounded-b-lg rounded-tr-lg p-6 border-t-4 border-red-600 min-h-[400px]">
-            
-            <!-- TREINO A -->
-            <div id="tab-A" class="workout-tab space-y-4">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-2xl font-bold text-white military-font">PRESSÃO SUPERIOR (APOIADO)</h3>
-                    <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Descanso: 60s</span>
-                </div>
-
-                <div class="space-y-3">
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-blue-500 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                            <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Supino Máquina Sentado</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">8-10 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400 mt-1">Substitui o supino livre. Apoie bem a cabeça no banco.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-blue-500 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                            <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Elevação Lateral Sentado</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">12-15 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400 mt-1">Sem peso acima da cabeça. Foco na lateral do ombro.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-slate-600 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                            <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Voador (Peck Deck)</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">3 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">12-15 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400 mt-1">Controle a volta para não tracionar o ombro/cervical demais.</p>
-                        </div>
-                    </div>
-                    
-                     <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-slate-600 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                            <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Tríceps Corda (Polia)</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">12-15 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400 mt-1">Mantenha coluna neutra. Sem balanço.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-red-900/20 p-4 rounded-lg border-l-4 border-yellow-500 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                            <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="flame" class="w-4 h-4 text-yellow-500"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-yellow-500">FINALIZADOR: Tríceps Máquina</h4>
-                            <p class="text-sm text-white mt-1">3 Séries até a falha. Mais seguro que flexão de braço para sua cervical agora.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TREINO B -->
-            <div id="tab-B" class="workout-tab hidden space-y-4">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-2xl font-bold text-white military-font">INFERIOR (SEM IMPACTO)</h3>
-                    <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Pernas</span>
-                </div>
-                <div class="bg-orange-900/30 text-orange-200 text-xs p-3 rounded mb-4 border border-orange-800 flex items-start gap-2">
-                    <i data-lucide="activity" class="w-4 h-4 mt-0.5"></i>
-                    <span><strong>ALERTA CLEMBUTEROL:</strong> Hidratação máxima. Cãibras são comuns no treino de perna.</span>
-                </div>
-
-                <div class="space-y-3">
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-blue-500 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Leg Press Horizontal</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">10-12 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Prefira o horizontal ao 45º se possível. Mantém a coluna neutra.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-blue-500 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Cadeira Extensora</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">15 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Isola quadríceps sem peso nas costas.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-slate-600 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Cadeira Abdutora</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">15 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Substituto seguro para agachamentos laterais/sumô.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-slate-600 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Panturrilha Sentado (Máquina)</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">5 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">15 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Evita carga axial da panturrilha em pé.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-slate-600 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Abdominal Supra (Curto)</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">20 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Chão. Apoie as mãos atrás da cabeça para não puxar o pescoço.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TREINO C -->
-            <div id="tab-C" class="workout-tab hidden space-y-4">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-2xl font-bold text-white military-font">TRAÇÃO (PEITO APOIADO)</h3>
-                    <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Costas + Bíceps</span>
-                </div>
-
-                <div class="space-y-3">
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-blue-500 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Remada Máquina (Peito Apoiado)</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">10-12 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Substituto do Terra e Remada Curvada. Proteção total lombar.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-blue-500 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Puxada Alta (Frente)</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">10-12 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Incline levemente o tronco para trás (15º) e puxe no peito.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-slate-600 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Remada Baixa (Cabo/Triângulo)</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">3 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">12 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Coluna reta. Puxe no umbigo.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-slate-600 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Rosca Scott (Máquina)</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">10-12 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Apoio de braço evita balanço do corpo.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-slate-600 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Rosca Martelo (Sentado)</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">3 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">12 Reps</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TREINO D -->
-            <div id="tab-D" class="workout-tab hidden space-y-4">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-2xl font-bold text-white military-font">METABÓLICO + CARDIO</h3>
-                    <span class="text-xs bg-slate-700 px-2 py-1 rounded text-slate-300">Sem Impacto</span>
-                </div>
-
-                <div class="space-y-3">
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-blue-500 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Bike Horizontal (TIRO)</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">20 MIN</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">HIIT</span>
-                            </div>
-                            <p class="text-sm text-slate-400">1 min leve / 30seg rápido. Costas apoiadas o tempo todo.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-slate-600 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Mesa Flexora</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">15 Reps</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-slate-600 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Cadeira Adutora</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">20 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Substituto do Agachamento Sumô.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-slate-900 p-4 rounded-lg border-l-4 border-slate-600 flex items-start gap-4">
-                        <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="check" class="w-4 h-4 text-white"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-white">Face Pull</h4>
-                            <div class="flex flex-wrap gap-2 my-1">
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">4 Séries</span>
-                                <span class="bg-slate-700 text-xs px-2 py-0.5 rounded text-white font-mono">15 Reps</span>
-                            </div>
-                            <p class="text-sm text-slate-400">Essencial para sua cervical. Fortalece o pescoço/postura.</p>
-                        </div>
-                    </div>
-
-                    <div class="exercise-card bg-red-900/20 p-4 rounded-lg border-l-4 border-yellow-500 flex items-start gap-4">
-                         <label class="custom-checkbox cursor-pointer relative mt-1">
-                             <input type="checkbox" class="sr-only" onchange="toggleComplete(this)">
-                            <div class="w-6 h-6 border-2 border-slate-600 rounded flex items-center justify-center transition-colors"><i data-lucide="flame" class="w-4 h-4 text-yellow-500"></i></div>
-                        </label>
-                        <div class="flex-1">
-                            <h4 class="font-bold text-lg text-yellow-500">CARDIO FINAL (Bike)</h4>
-                            <p class="text-sm text-white mt-1">Mais 20 min moderados na Bike Horizontal para fechar.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+      {/* DAY SELECTOR */}
+      <div className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50">
+        <div className="max-w-md mx-auto overflow-x-auto no-scrollbar py-3 px-4 flex gap-2">
+          {days.map(day => (
+            <button
+              key={day.key}
+              onClick={() => setActiveDay(day.key)}
+              className={`
+                shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300
+                ${activeDay === day.key 
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40 scale-105' 
+                  : 'bg-slate-900 text-slate-500 hover:bg-slate-800 border border-slate-800'}
+              `}
+            >
+              {day.label}
+            </button>
+          ))}
         </div>
+      </div>
 
-    </main>
+      {/* WORKOUT CONTENT */}
+      <main className="max-w-md mx-auto p-4 space-y-6">
+        
+        <div className="animate-fade-in-up">
+          <div className="flex items-center gap-2 mb-2">
+            {workoutPlan[activeDay].groups.map(g => (
+              <span key={g} className="bg-slate-900 border border-slate-700 p-1.5 rounded-lg">
+                <MuscleIcon group={g} />
+              </span>
+            ))}
+            <span className="text-sm font-bold text-slate-300 uppercase tracking-wide">
+              {workoutPlan[activeDay].focus}
+            </span>
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-6">
+            {workoutPlan[activeDay].title}
+          </h2>
 
-    <script>
-        // Inicializa ícones
-        lucide.createIcons();
+          <div className="space-y-4">
+            {workoutPlan[activeDay].exercises.map((exercise, index) => (
+              <div 
+                key={exercise.id} 
+                className="group bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-blue-500/30 transition-all duration-300 shadow-lg relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-all"></div>
 
-        // Função de troca de abas
-        function switchTab(tabId) {
-            // Esconder todos os conteúdos
-            const contents = document.querySelectorAll('.workout-tab');
-            contents.forEach(content => content.classList.add('hidden'));
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-bold text-lg text-slate-100">{exercise.name}</h3>
+                    <div className="text-xs font-mono bg-slate-950 px-2 py-1 rounded text-slate-400 border border-slate-800">
+                      {exercise.sets} Séries
+                    </div>
+                  </div>
 
-            // Mostrar o selecionado
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
+                  <p className="text-xs text-blue-300/80 mb-4 flex items-center gap-1">
+                    <Info size={12} /> {exercise.note}
+                  </p>
 
-            // Atualizar botões
-            const buttons = document.querySelectorAll('button[id^="btn-"]');
-            buttons.forEach(btn => {
-                btn.classList.remove('tab-active');
-                btn.classList.add('tab-inactive');
-            });
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-[1fr_auto_auto] gap-2 text-[10px] uppercase font-bold text-slate-500 mb-1 px-1">
+                      <span>Carga (KG)</span>
+                      <span className="text-center w-12">Reps</span>
+                      <span className="text-center w-8">Feito</span>
+                    </div>
 
-            const activeBtn = document.getElementById('btn-' + tabId);
-            activeBtn.classList.remove('tab-inactive');
-            activeBtn.classList.add('tab-active');
-        }
+                    {Array.from({ length: parseInt(exercise.sets) }).map((_, i) => {
+                      const isDone = progress[`${activeDay}-${exercise.id}-${i}`];
+                      return (
+                        <div key={i} className="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
+                          <div className="relative">
+                            <input 
+                              type="number" 
+                              placeholder="0"
+                              value={weights[`${exercise.id}`] || ''}
+                              onChange={(e) => handleWeightChange(exercise.id, e.target.value)}
+                              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-sm font-mono text-white focus:outline-none focus:border-blue-500 transition-colors"
+                            />
+                            <span className="absolute right-3 top-2.5 text-xs text-slate-600 font-bold">KG</span>
+                          </div>
 
-        // Função de marcar completo
-        function toggleComplete(checkbox) {
-            const card = checkbox.closest('.exercise-card');
-            if (checkbox.checked) {
-                card.classList.add('completed');
-            } else {
-                card.classList.remove('completed');
-            }
-        }
-    </script>
-</body>
-</html>
+                          <div className="w-12 h-9 flex items-center justify-center bg-slate-800/50 rounded-lg text-xs font-mono text-slate-300 border border-slate-800">
+                            {exercise.reps}
+                          </div>
+
+                          <button
+                            onClick={() => toggleSet(exercise.id, i)}
+                            className={`
+                              w-9 h-9 rounded-lg flex items-center justify-center border transition-all duration-300
+                              ${isDone 
+                                ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_10px_rgba(37,99,235,0.5)]' 
+                                : 'bg-slate-950 border-slate-800 text-slate-700 hover:border-slate-600'}
+                            `}
+                          >
+                            {isDone && <Check size={16} />}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      {/* FLOAT ACTION BUTTONS */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30 w-max">
+        
+        {/* Export Excel */}
+        <button 
+          onClick={handleExcelCopy}
+          className="group relative flex items-center gap-2 bg-emerald-900/90 hover:bg-emerald-800 text-emerald-100 border border-emerald-700 px-4 py-3 rounded-full shadow-lg backdrop-blur-md transition-all active:scale-95"
+        >
+          {copyFeedback === 'excel' ? <Check size={20} /> : <FileSpreadsheet size={20} />}
+          <span className="text-xs font-bold uppercase pr-1">
+            {copyFeedback === 'excel' ? 'Copiado!' : 'Planilha'}
+          </span>
+        </button>
+
+        {/* Export WhatsApp */}
+        <button 
+          onClick={handleWhatsAppCopy}
+          className="group relative flex items-center gap-2 bg-green-600/90 hover:bg-green-500 text-white border border-green-500 px-6 py-3 rounded-full shadow-lg shadow-green-900/50 backdrop-blur-md transition-all active:scale-95"
+        >
+          {copyFeedback === 'whatsapp' ? <Check size={20} /> : <Share2 size={20} />}
+          <span className="text-xs font-bold uppercase pr-1">
+            {copyFeedback === 'whatsapp' ? 'Copiado!' : 'WhatsApp'}
+          </span>
+        </button>
+
+      </div>
+
+    </div>
+  );
+};
+
+// CSS for animations
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out forwards;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`;
+document.head.appendChild(style);
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<WorkoutApp />);

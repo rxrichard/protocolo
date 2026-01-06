@@ -117,7 +117,22 @@ const MuscleIcon = ({ group }) => {
 };
 
 const WorkoutApp = () => {
-  const [activeDay, setActiveDay] = useState('segunda');
+  // Detectar dia da semana atual
+  const getDayOfWeek = () => {
+    const dayMap = {
+      0: 'domingo',   // Domingo
+      1: 'segunda',   // Segunda
+      2: 'terca',     // Terça
+      3: 'quarta',    // Quarta
+      4: 'quinta',    // Quinta
+      5: 'sexta',     // Sexta
+      6: 'sabado'     // Sábado
+    };
+    const today = new Date().getDay();
+    return dayMap[today];
+  };
+
+  const [activeDay, setActiveDay] = useState(getDayOfWeek());
   const [progress, setProgress] = useState({});
   const [weights, setWeights] = useState({});
   const [copyFeedback, setCopyFeedback] = useState(null); // 'whatsapp' | 'excel' | null

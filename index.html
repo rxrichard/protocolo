@@ -1,223 +1,174 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PROJECT TANK - Sistema Integrado</title>
-  <!-- React & ReactDOM via CDN -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BASTOS.OS - Sistema Integrado</title>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <!-- Tailwind CSS via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Babel para JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --bg-base: #f4f4f5;
+      --bg-card: #ffffff;
+      --border-color: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --brand-color: #10b981;
+      --brand-text: #ffffff;
+      --shadow-color: rgba(16, 185, 129, 0.4);
+      --overlay: rgba(255, 255, 255, 0.9);
+    }
+    .dark {
+      --bg-base: #050505;
+      --bg-card: #111111;
+      --border-color: #222222;
+      --text-main: #ffffff;
+      --text-muted: #9ca3af;
+      --brand-color: #ccff00;
+      --brand-text: #000000;
+      --shadow-color: rgba(204, 255, 0, 0.3);
+      --overlay: rgba(0, 0, 0, 0.9);
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    @keyframes fade-in-up { 
+      from { opacity: 0; transform: translateY(20px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+    .animate-fade-in-up { animation: fade-in-up 0.4s ease-out forwards; }
+    
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    input[type="number"]::-webkit-inner-spin-button, 
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+  </style>
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            brand: '#ccff00', // Neon Green
-            dark: '#050505',
-            card: '#111111',
-            border: '#222222',
-            protocol: '#3b82f6' // Blue
+            brand: 'var(--brand-color)',
+            'brand-text': 'var(--brand-text)',
+            dark: 'var(--bg-base)',
+            card: 'var(--bg-card)',
+            border: 'var(--border-color)',
+            protocol: '#3b82f6'
+          },
+          textColor: {
+            main: 'var(--text-main)',
+            muted: 'var(--text-muted)'
+          },
+          boxShadow: {
+            'brand': '0 0 15px var(--shadow-color)',
+            'brand-lg': '0 0 30px var(--shadow-color)',
           }
         }
       }
     }
   </script>
 </head>
-<body class="m-0 p-0 bg-dark text-gray-200">
+<body class="m-0 p-0 overflow-x-hidden">
   <div id="root"></div>
   
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // --- ÍCONES SVG MANUAIS ---
+    // Ícones
     const IconBase = ({ children, size = 24, className = "" }) => (
-      <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width={size} 
-        height={size} 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round" 
-        className={className}
-      >
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
         {children}
       </svg>
     );
 
-    const Dumbbell = (props) => (
-      <IconBase {...props}>
-        <path d="m6.5 6.5 11 11" />
-        <path d="m21 21-1-1" />
-        <path d="m3 3 1 1" />
-        <path d="m18 22 4-4" />
-        <path d="m2 6 4-4" />
-        <path d="m3 10 7-7" />
-        <path d="m14 21 7-7" />
-      </IconBase>
-    );
-
-    const Activity = (props) => (
-      <IconBase {...props}>
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-      </IconBase>
-    );
-
-    const Trophy = (props) => (
-      <IconBase {...props}>
-        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-        <path d="M4 22h16" />
-        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-      </IconBase>
-    );
-
-    const Info = (props) => (
-      <IconBase {...props}>
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 16v-4" />
-        <path d="M12 8h.01" />
-      </IconBase>
-    );
-
-    const Share2 = (props) => (
-      <IconBase {...props}>
-        <circle cx="18" cy="5" r="3" />
-        <circle cx="6" cy="12" r="3" />
-        <circle cx="18" cy="19" r="3" />
-        <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
-        <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
-      </IconBase>
-    );
-
-    const FileSpreadsheet = (props) => (
-      <IconBase {...props}>
-        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-        <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-        <path d="M8 13h2" />
-        <path d="M14 13h2" />
-        <path d="M8 17h2" />
-        <path d="M14 17h2" />
-      </IconBase>
-    );
-
-    const Check = (props) => (
-      <IconBase {...props}>
-        <path d="M20 6 9 17l-5-5" />
-      </IconBase>
-    );
-
-    const AlertTriangle = (props) => (
-      <IconBase {...props}>
-        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-        <line x1="12" y1="9" x2="12" y2="13"></line>
-        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-      </IconBase>
-    );
-
-    const Droplet = (props) => (
-      <IconBase {...props}>
-        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-      </IconBase>
-    );
-
-    const Shield = (props) => (
-      <IconBase {...props}>
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-      </IconBase>
-    );
-
-    const Coffee = (props) => (
-      <IconBase {...props}>
-        <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-        <line x1="6" y1="1" x2="6" y2="4"></line>
-        <line x1="10" y1="1" x2="10" y2="4"></line>
-        <line x1="14" y1="1" x2="14" y2="4"></line>
-      </IconBase>
-    );
-
-    const Calendar = (props) => (
-      <IconBase {...props}>
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-        <line x1="16" y1="2" x2="16" y2="6"></line>
-        <line x1="8" y1="2" x2="8" y2="6"></line>
-        <line x1="3" y1="10" x2="21" y2="10"></line>
-      </IconBase>
-    );
-
-    const Apple = (props) => (
-      <IconBase {...props}>
-        <path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"></path>
-        <path d="M10 2c1 .5 2 2 2 5"></path>
-      </IconBase>
-    );
+    const Dumbbell = (props) => <IconBase {...props}><path d="m6.5 6.5 11 11" /><path d="m21 21-1-1" /><path d="m3 3 1 1" /><path d="m18 22 4-4" /><path d="m2 6 4-4" /><path d="m3 10 7-7" /><path d="m14 21 7-7" /></IconBase>;
+    const Activity = (props) => <IconBase {...props}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></IconBase>;
+    const Trophy = (props) => <IconBase {...props}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></IconBase>;
+    const Info = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></IconBase>;
+    const Share2 = (props) => <IconBase {...props}><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" x2="15.42" y1="13.51" y2="17.49" /><line x1="15.41" x2="8.59" y1="6.51" y2="10.49" /></IconBase>;
+    const FileSpreadsheet = (props) => <IconBase {...props}><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M8 13h2" /><path d="M14 13h2" /><path d="M8 17h2" /><path d="M14 17h2" /></IconBase>;
+    const Check = (props) => <IconBase {...props}><path d="M20 6 9 17l-5-5" /></IconBase>;
+    const AlertTriangle = (props) => <IconBase {...props}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></IconBase>;
+    const Droplet = (props) => <IconBase {...props}><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></IconBase>;
+    const Shield = (props) => <IconBase {...props}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></IconBase>;
+    const Coffee = (props) => <IconBase {...props}><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></IconBase>;
+    const Apple = (props) => <IconBase {...props}><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"></path><path d="M10 2c1 .5 2 2 2 5"></path></IconBase>;
+    const PlayCircle = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></IconBase>;
+    const X = (props) => <IconBase {...props}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></IconBase>;
+    const Sun = (props) => <IconBase {...props}><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></IconBase>;
+    const Moon = (props) => <IconBase {...props}><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></IconBase>;
 
     const MuscleIcon = ({ group }) => {
-      const colors = {
-        peito: "text-brand",
-        costas: "text-brand",
-        pernas: "text-brand",
-        ombros: "text-brand",
-        bracos: "text-brand",
-        cardio: "text-brand"
-      };
+      const colors = { peito: "text-brand", costas: "text-brand", pernas: "text-brand", ombros: "text-brand", bracos: "text-brand", cardio: "text-brand" };
       return <Dumbbell className={colors[group] || "text-gray-500"} size={20} />;
     };
 
     const AppContainer = () => {
-      const [currentView, setCurrentView] = useState('treino'); // 'treino' | 'dieta'
+      const [currentView, setCurrentView] = useState('treino'); 
+      const [isDark, setIsDark] = useState(true);
+
+      useEffect(() => {
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }, [isDark]);
 
       return (
-        <div className="min-h-screen bg-dark text-gray-200 font-sans selection:bg-brand selection:text-black pb-32">
-          
-          {/* HEADER COM TOOGLE */}
-          <header className="relative bg-card border-b border-border p-6 shadow-2xl">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-brand/5 blur-[80px] rounded-full pointer-events-none"></div>
-            <div className="max-w-7xl mx-auto relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="min-h-screen bg-dark text-main font-sans selection:bg-brand selection:text-brand-text pb-32 transition-colors duration-300">
+          <header className="relative bg-card border-b border-border p-5 md:p-6 shadow-sm transition-colors duration-300 overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand/10 blur-[80px] rounded-full pointer-events-none transition-all duration-300"></div>
+            <div className="max-w-7xl mx-auto relative z-10 flex flex-col gap-5">
               
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-2xl font-black italic tracking-tighter text-white">
-                    TECH<span className="text-brand">FIT</span>
-                  </h1>
-                  {currentView === 'treino' ? <Trophy className="text-brand" size={24} /> : <Activity className="text-brand" size={24} />}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-1">
+                    <h1 className="text-2xl font-black italic tracking-tighter text-main">
+                      BASTOS.<span className="text-brand">OS</span>
+                    </h1>
+                  </div>
+                  <p className="text-[10px] md:text-xs text-muted font-bold uppercase tracking-widest flex items-center gap-1.5">
+                    {currentView === 'treino' ? <Trophy size={12} className="text-brand" /> : <Activity size={12} className="text-brand" />}
+                    {currentView === 'treino' ? 'PROTOCOLO HORMONAL' : 'NUTRIÇÃO CLÍNICA'}
+                  </p>
                 </div>
-                <p className="text-xs text-gray-500 font-medium uppercase tracking-widest">
-                  RICHARD B. • {currentView === 'treino' ? 'PROTOCOLO HORMONAL' : 'NUTRIÇÃO CLÍNICA'}
-                </p>
+                
+                <button 
+                  onClick={() => setIsDark(!isDark)} 
+                  className="p-2.5 rounded-full bg-dark border border-border text-muted hover:text-main transition-colors shadow-sm"
+                  aria-label="Toggle Theme"
+                >
+                  {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                </button>
               </div>
 
-              {/* TOOGLE SWITCH */}
-              <div className="flex bg-dark p-1 rounded-xl border border-border shrink-0 self-start md:self-auto">
+              <div className="flex bg-dark p-1.5 rounded-xl border border-border w-full shadow-inner">
                 <button 
                   onClick={() => setCurrentView('treino')}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 ${
-                    currentView === 'treino' 
-                      ? 'bg-brand text-black shadow-[0_0_15px_rgba(204,255,0,0.2)]' 
-                      : 'text-gray-400 hover:text-white'
+                  className={`flex-1 flex justify-center items-center gap-2 px-2 py-3 rounded-lg text-xs md:text-sm font-bold transition-all duration-300 ${
+                    currentView === 'treino' ? 'bg-brand text-brand-text shadow-brand' : 'text-muted hover:text-main'
                   }`}
                 >
-                  <Dumbbell size={18} />
+                  <Dumbbell size={16} />
                   TREINO
                 </button>
                 <button 
                   onClick={() => setCurrentView('dieta')}
-                  className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 ${
-                    currentView === 'dieta' 
-                      ? 'bg-brand text-black shadow-[0_0_15px_rgba(204,255,0,0.2)]' 
-                      : 'text-gray-400 hover:text-white'
+                  className={`flex-1 flex justify-center items-center gap-2 px-2 py-3 rounded-lg text-xs md:text-sm font-bold transition-all duration-300 ${
+                    currentView === 'dieta' ? 'bg-brand text-brand-text shadow-brand' : 'text-muted hover:text-main'
                   }`}
                 >
-                  <Apple size={18} />
+                  <Apple size={16} />
                   DIETA
                 </button>
               </div>
@@ -231,7 +182,6 @@
       );
     };
 
-    // --- COMPONENTE: TREINO ---
     const TreinoView = () => {
       const getDayOfWeek = () => {
         const dayMap = { 0: 'domingo', 1: 'segunda', 2: 'terca', 3: 'quarta', 4: 'quinta', 5: 'sexta', 6: 'sabado' };
@@ -242,91 +192,22 @@
       const [progress, setProgress] = useState({});
       const [weights, setWeights] = useState({});
       const [copyFeedback, setCopyFeedback] = useState(null);
+      const [videoModal, setVideoModal] = useState(null);
 
       const workoutPlan = {
-        segunda: {
-          title: "Treino A1 (Força Bruta)",
-          focus: "Superiores & Core - Alta Carga / 90s a 120s Descanso",
-          groups: ["costas", "peito", "ombros", "bracos"],
-          exercises: [
-            { id: 's1', name: "Puxada Frontal na Polia", sets: "4", reps: "6-8", note: "Carga alta. Descanso de 90 a 120s." },
-            { id: 's2', name: "Supino (Máquina ou Halteres)", sets: "4", reps: "6-8", note: "Descanso de 90 a 120s." },
-            { id: 's3', name: "Remada Curvada (Máquina)", sets: "3", reps: "8-10", note: "Peito apoiado." },
-            { id: 's4', name: "Desenvolvimento Máquina", sets: "3", reps: "8-10", note: "Controle na descida." },
-            { id: 's5', name: "Dead Bug com Halteres", sets: "3", reps: "10/lado", note: "Segure peso no alto. Zero pressão no pé." }
-          ]
-        },
-        terca: {
-          title: "Treino B1 (Força Bruta)",
-          focus: "Inferiores & Aeróbio - Proteção Articular",
-          groups: ["pernas", "cardio"],
-          exercises: [
-            { id: 't1', name: "Leg Press 45º ou Horizontal", sets: "4", reps: "8-10", note: "Apoie toda a planta do pé, força no calcanhar." },
-            { id: 't2', name: "Cadeira Extensora", sets: "4", reps: "8-10", note: "Segure 1s no pico de contração." },
-            { id: 't3', name: "Cadeira Flexora", sets: "4", reps: "8-10", note: "Descida controlada." },
-            { id: 't4', name: "Bicicleta Ergométrica", sets: "1", reps: "20 min", note: "Carga moderada a pesada, RPM constante." }
-          ]
-        },
-        quarta: {
-          title: "Recuperação Ativa",
-          focus: "Limpeza de Lactato & Cardiovascular",
-          groups: ["cardio"],
-          exercises: [
-            { id: 'q1', name: "Bicicleta Ergométrica ou Remo", sets: "1", reps: "30 min", note: "Manter batimentos controlados. Sem impacto." }
-          ]
-        },
-        quinta: {
-          title: "Treino A2 (Hipertrofia)",
-          focus: "Superiores - Tensão Contínua / 90s Descanso",
-          groups: ["peito", "costas", "ombros", "bracos"],
-          exercises: [
-            { id: 'qi1', name: "Supino Inclinado", sets: "4", reps: "8-10", note: "Máquina ou Halteres." },
-            { id: 'qi2', name: "Puxada com Triângulo", sets: "4", reps: "8-10", note: "Polia alta, focar na contração do miolo das costas." },
-            { id: 'qi3', name: "Elevação Lateral", sets: "4", reps: "10-12", note: "Movimento isolado, sem balançar o tronco." },
-            { id: 'qi4', name: "Tríceps Corda + Rosca Martelo", sets: "3", reps: "10-12", note: "Biset: Faça os dois sem descanso entre eles." },
-            { id: 'qi5', name: "Abdominal Supra Curto c/ Anilha", sets: "3", reps: "15", note: "Apoie anilha no peito. Pés relaxados no chão." }
-          ]
-        },
-        sexta: {
-          title: "Treino B2 (Hipertrofia)",
-          focus: "Inferiores & Assimetrias",
-          groups: ["pernas", "cardio"],
-          exercises: [
-            { id: 'sx1', name: "Cadeira Extensora Unilateral", sets: "3", reps: "10/perna", note: "Foco em corrigir assimetrias." },
-            { id: 'sx2', name: "Cadeira Flexora", sets: "4", reps: "10-12", note: "Tensão constante." },
-            { id: 'sx3', name: "Leg Press (Pés Altos)", sets: "3", reps: "10-12", note: "Foco no glúteo e posterior da coxa." },
-            { id: 'sx4', name: "Bicicleta Ergométrica ou Remo", sets: "1", reps: "25 min", note: "Ritmo contínuo." }
-          ]
-        },
-        sabado: {
-          title: "Recuperação Ativa",
-          focus: "Cardiovascular e Controle Lipídico",
-          groups: ["cardio"],
-          exercises: [
-            { id: 'sb1', name: "Bicicleta Ergométrica", sets: "1", reps: "30 min", note: "Fundamental para controle do colesterol." }
-          ]
-        },
-        domingo: {
-          title: "Descanso Total",
-          focus: "Recuperação Sistêmica",
-          groups: [],
-          exercises: [
-            { id: 'dm1', name: "Mobilidade Leve", sets: "1", reps: "15 min", note: "Apenas se sentir necessidade." }
-          ]
-        }
+        segunda: { title: "Treino A1 (Força Bruta)", focus: "Superiores & Core - Alta Carga / 90s a 120s Descanso", groups: ["costas", "peito", "ombros", "bracos"], exercises: [ { id: 's1', name: "Puxada Frontal na Polia", sets: "4", reps: "6-8", note: "Carga alta. Descanso de 90 a 120s." }, { id: 's2', name: "Supino Reto (Máquina ou Halteres)", sets: "4", reps: "6-8", note: "Descanso de 90 a 120s." }, { id: 's3', name: "Remada Curvada (Máquina)", sets: "3", reps: "8-10", note: "Peito apoiado." }, { id: 's4', name: "Desenvolvimento Máquina", sets: "3", reps: "8-10", note: "Controle na descida." }, { id: 's5', name: "Dead Bug", sets: "3", reps: "10/lado", note: "Segure peso no alto. Zero pressão no pé." } ] },
+        terca: { title: "Treino B1 (Força Bruta)", focus: "Inferiores & Aeróbio - Proteção Articular", groups: ["pernas", "cardio"], exercises: [ { id: 't1', name: "Leg Press 45", sets: "4", reps: "8-10", note: "Apoie toda a planta do pé, força no calcanhar." }, { id: 't2', name: "Cadeira Extensora", sets: "4", reps: "8-10", note: "Segure 1s no pico de contração." }, { id: 't3', name: "Cadeira Flexora", sets: "4", reps: "8-10", note: "Descida controlada." }, { id: 't4', name: "Bicicleta Ergométrica", sets: "1", reps: "20 min", note: "Carga moderada a pesada, RPM constante." } ] },
+        quarta: { title: "Recuperação Ativa", focus: "Limpeza de Lactato & Cardiovascular", groups: ["cardio"], exercises: [ { id: 'q1', name: "Bicicleta Ergométrica", sets: "1", reps: "30 min", note: "Manter batimentos controlados. Sem impacto." } ] },
+        quinta: { title: "Treino A2 (Hipertrofia)", focus: "Superiores - Tensão Contínua / 90s Descanso", groups: ["peito", "costas", "ombros", "bracos"], exercises: [ { id: 'qi1', name: "Supino Inclinado", sets: "4", reps: "8-10", note: "Máquina ou Halteres." }, { id: 'qi2', name: "Puxada com Triângulo", sets: "4", reps: "8-10", note: "Polia alta, focar na contração do miolo das costas." }, { id: 'qi3', name: "Elevação Lateral", sets: "4", reps: "10-12", note: "Movimento isolado, sem balançar o tronco." }, { id: 'qi4', name: "Tríceps Corda", sets: "3", reps: "10-12", note: "Biset com Rosca Martelo." }, { id: 'qi5', name: "Abdominal Supra", sets: "3", reps: "15", note: "Apoie anilha no peito. Pés relaxados no chão." } ] },
+        sexta: { title: "Treino B2 (Hipertrofia)", focus: "Inferiores & Assimetrias", groups: ["pernas", "cardio"], exercises: [ { id: 'sx1', name: "Cadeira Extensora Unilateral", sets: "3", reps: "10/perna", note: "Foco em corrigir assimetrias." }, { id: 'sx2', name: "Cadeira Flexora", sets: "4", reps: "10-12", note: "Tensão constante." }, { id: 'sx3', name: "Leg Press", sets: "3", reps: "10-12", note: "Foco no glúteo e posterior da coxa (Pés Altos)." }, { id: 'sx4', name: "Bicicleta Ergométrica", sets: "1", reps: "25 min", note: "Ritmo contínuo." } ] },
+        sabado: { title: "Recuperação Ativa", focus: "Cardiovascular e Controle Lipídico", groups: ["cardio"], exercises: [ { id: 'sb1', name: "Bicicleta Ergométrica", sets: "1", reps: "30 min", note: "Fundamental para controle do colesterol." } ] },
+        domingo: { title: "Descanso Total", focus: "Recuperação Sistêmica", groups: [], exercises: [ { id: 'dm1', name: "Alongamento", sets: "1", reps: "15 min", note: "Apenas se sentir necessidade." } ] }
       };
 
-      const days = [
-        { key: 'segunda', label: 'SEG' },
-        { key: 'terca', label: 'TER' },
-        { key: 'quarta', label: 'QUA' },
-        { key: 'quinta', label: 'QUI' },
-        { key: 'sexta', label: 'SEX' },
-        { key: 'sabado', label: 'SÁB' },
-        { key: 'domingo', label: 'DOM' },
-      ];
+      const days = [ { key: 'segunda', label: 'SEG' }, { key: 'terca', label: 'TER' }, { key: 'quarta', label: 'QUA' }, { key: 'quinta', label: 'QUI' }, { key: 'sexta', label: 'SEX' }, { key: 'sabado', label: 'SÁB' }, { key: 'domingo', label: 'DOM' } ];
 
       const handleWeightChange = (exerciseId, val) => setWeights(prev => ({ ...prev, [exerciseId]: val }));
+      
       const toggleSet = (exerciseId, setIndex) => {
         const key = `${activeDay}-${exerciseId}-${setIndex}`;
         setProgress(prev => ({ ...prev, [key]: !prev[key] }));
@@ -337,13 +218,17 @@
         textArea.value = text;
         document.body.appendChild(textArea);
         textArea.select();
-        try { document.execCommand('copy'); setCopyFeedback(type); setTimeout(() => setCopyFeedback(null), 2000); } catch (err) {}
+        try { 
+          document.execCommand('copy'); 
+          setCopyFeedback(type); 
+          setTimeout(() => setCopyFeedback(null), 2000); 
+        } catch (err) {}
         document.body.removeChild(textArea);
       };
 
       const handleWhatsAppCopy = () => {
         const todayPlan = workoutPlan[activeDay];
-        let text = `⚡ *SYSFIT - ${todayPlan.title}*
+        let text = `⚡ *BASTOS.OS - ${todayPlan.title}*
 📅 Data: ${new Date().toLocaleDateString('pt-BR')}
 🎯 Foco: ${todayPlan.focus}
 
@@ -387,18 +272,17 @@
 
       return (
         <>
-          {/* DAY SELECTOR */}
-          <div className="sticky top-0 z-20 bg-dark/90 backdrop-blur-md border-b border-border">
+          <div className="sticky top-0 z-20 bg-dark/95 backdrop-blur-md border-b border-border shadow-sm transition-colors duration-300">
             <div className="max-w-7xl mx-auto overflow-x-auto no-scrollbar py-3 px-4 flex gap-2">
               {days.map(day => (
                 <button
                   key={day.key}
                   onClick={() => setActiveDay(day.key)}
                   className={`
-                    shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300
+                    shrink-0 px-5 py-2.5 rounded-full text-[11px] md:text-xs font-bold transition-all duration-300
                     ${activeDay === day.key 
-                      ? 'bg-brand text-black shadow-lg shadow-brand/20 scale-105' 
-                      : 'bg-card text-gray-400 hover:bg-border border border-border'}
+                      ? 'bg-brand text-brand-text shadow-brand scale-105' 
+                      : 'bg-card text-muted hover:bg-border border border-border'}
                   `}
                 >
                   {day.label}
@@ -408,97 +292,104 @@
           </div>
 
           <main className="max-w-7xl mx-auto p-4">
-            
-            {/* PROGRESS BAR (Mobile only, hidden on desktop sidebar) */}
-            <div className="lg:hidden mb-6 bg-card border border-border rounded-xl p-4">
+            <div className="lg:hidden mb-6 bg-card border border-border rounded-xl p-4 transition-colors duration-300">
                <div className="flex justify-between text-xs font-bold mb-2">
-                  <span className="text-gray-400">PROGRESSO DO TREINO</span>
+                  <span className="text-muted">PROGRESSO DO TREINO</span>
                   <span className="text-brand">{percentage}%</span>
                 </div>
-                <div className="h-1.5 bg-dark rounded-full overflow-hidden border border-border">
+                <div className="h-2 bg-dark rounded-full overflow-hidden border border-border">
                   <div className="h-full bg-brand transition-all duration-500 ease-out" style={{ width: `${percentage}%` }}></div>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
               
-              {/* SIDEBAR - Desktop Only */}
               <div className="hidden lg:block">
-                <div className="sticky top-24 space-y-6 animate-fade-in-up">
-                  <div className="bg-card border border-border rounded-2xl p-4">
-                    <h3 className="text-xs uppercase font-bold text-gray-500 mb-3">Treino do Dia</h3>
-                    <div className="flex items-center gap-2 mb-4">
+                <div className="sticky top-28 space-y-6 animate-fade-in-up">
+                  <div className="bg-card border border-border rounded-2xl p-5 transition-colors duration-300 shadow-sm">
+                    <h3 className="text-xs uppercase font-bold text-muted mb-4">Treino do Dia</h3>
+                    <div className="flex items-center gap-2 mb-4 flex-wrap">
                       {workoutPlan[activeDay].groups.map(g => (
-                        <span key={g} className="bg-dark border border-border p-2 rounded-lg">
-                          <MuscleIcon group={g} />
+                        <span key={g} className="bg-dark border border-border px-3 py-1.5 rounded-md flex items-center gap-1.5 text-xs font-bold uppercase text-main shadow-sm transition-colors duration-300">
+                          {g === 'cardio' ? <Activity size={14} className="text-brand" /> : <Dumbbell size={14} className="text-brand" />}
+                          {g}
                         </span>
                       ))}
                     </div>
-                    <p className="text-xs text-gray-400 leading-relaxed">{workoutPlan[activeDay].focus}</p>
+                    <p className="text-sm text-muted leading-relaxed font-medium">{workoutPlan[activeDay].focus}</p>
                   </div>
 
-                  <div className="bg-card border border-border rounded-2xl p-4">
-                    <h3 className="text-xs uppercase font-bold text-gray-500 mb-3">Estatísticas</h3>
-                    <div className="space-y-2 text-xs">
+                  <div className="bg-card border border-border rounded-2xl p-5 transition-colors duration-300 shadow-sm">
+                    <h3 className="text-xs uppercase font-bold text-muted mb-4">Estatísticas</h3>
+                    <div className="space-y-3 text-sm font-medium">
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Total de Séries</span>
-                        <span className="font-bold text-white">{totalSets}</span>
+                        <span className="text-muted">Total de Séries</span>
+                        <span className="font-bold text-main">{totalSets}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-400">Séries Feitas</span>
-                        <span className="font-bold text-white">{completedCount}</span>
+                        <span className="text-muted">Séries Feitas</span>
+                        <span className="font-bold text-main">{completedCount}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Progresso</span>
-                        <span className="font-bold text-brand">{percentage}%</span>
+                      <div className="flex justify-between pt-2 border-t border-border">
+                        <span className="text-muted">Progresso</span>
+                        <span className="font-bold text-brand text-lg">{percentage}%</span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* MAIN CONTENT */}
               <div className="lg:col-span-3">
                 <div className="animate-fade-in-up">
-                  <div className="lg:hidden flex items-center gap-2 mb-4">
+                  
+                  <div className="lg:hidden flex items-center gap-2 mb-4 flex-wrap">
                     {workoutPlan[activeDay].groups.map(g => (
-                      <span key={g} className="bg-card border border-border p-1.5 rounded-lg">
-                        <MuscleIcon group={g} />
+                      <span key={g} className="bg-card border border-border px-2.5 py-1.5 rounded-md flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase text-main shadow-sm transition-colors duration-300">
+                        {g === 'cardio' ? <Activity size={12} className="text-brand" /> : <Dumbbell size={12} className="text-brand" />}
+                        {g}
                       </span>
                     ))}
-                    <span className="text-sm font-bold text-gray-400 uppercase tracking-wide">
-                      {workoutPlan[activeDay].focus}
-                    </span>
                   </div>
-                  <h2 className="text-3xl font-bold text-white mb-6">
+                  
+                  <h2 className="text-2xl md:text-3xl font-bold text-main mb-2">
                     {workoutPlan[activeDay].title}
                   </h2>
+                  <p className="text-sm text-muted mb-6 lg:hidden font-medium">{workoutPlan[activeDay].focus}</p>
 
                   <div className="space-y-4">
                     {workoutPlan[activeDay].exercises.map((exercise, index) => (
-                  <div 
-                    key={exercise.id} 
-                    className="group bg-card border border-border rounded-2xl p-5 hover:border-brand/50 transition-all duration-300 shadow-lg relative overflow-hidden"
-                  >
+                  <div key={exercise.id} className="group bg-card border border-border rounded-2xl p-4 md:p-5 hover:border-brand/50 transition-all duration-300 shadow-sm relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-2xl group-hover:bg-brand/10 transition-all"></div>
-
+                    
                     <div className="relative z-10">
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="font-bold text-lg text-white">{exercise.name}</h3>
-                        <div className="text-xs font-mono bg-dark px-2 py-1 rounded text-gray-400 border border-border">
+                        <div 
+                          className="flex items-center gap-2.5 cursor-pointer group/title w-max pr-2"
+                          onClick={() => setVideoModal(exercise.name)}
+                        >
+                          <h3 className="font-bold text-[15px] md:text-lg text-main group-hover/title:text-brand transition-colors leading-tight">
+                            {exercise.name}
+                          </h3>
+                          <div className="bg-brand/20 p-1.5 rounded-full text-brand group-hover/title:bg-brand group-hover/title:text-brand-text transition-colors shadow-brand">
+                            <PlayCircle size={16} />
+                          </div>
+                        </div>
+
+                        <div className="text-[10px] font-bold bg-dark px-2.5 py-1.5 rounded-md text-muted border border-border shrink-0 mt-0.5 shadow-inner">
                           {exercise.sets} Séries
                         </div>
                       </div>
 
-                      <p className="text-xs text-gray-400 mb-4 flex items-center gap-1">
-                        <Info size={12} className="text-brand shrink-0" /> <span dangerouslySetInnerHTML={{ __html: exercise.note.replace('Zero pressão no pé', '<strong class="text-brand">Zero pressão no pé</strong>') }}></span>
+                      <p className="text-xs text-muted mb-5 flex items-start gap-1.5 leading-snug">
+                        <Info size={14} className="text-brand shrink-0 mt-0.5" /> 
+                        <span dangerouslySetInnerHTML={{ __html: exercise.note.replace('Zero pressão no pé', '<strong class="text-brand">Zero pressão no pé</strong>') }}></span>
                       </p>
 
                       <div className="space-y-2">
-                        <div className="grid grid-cols-[1fr_auto_auto] gap-2 text-[10px] uppercase font-bold text-gray-500 mb-1 px-1">
+                        <div className="grid grid-cols-[1fr_auto_auto] gap-2 text-[10px] uppercase font-bold text-muted mb-1 px-1">
                           <span>Carga (KG)</span>
-                          <span className="text-center w-12">Reps</span>
-                          <span className="text-center w-8">Feito</span>
+                          <span className="text-center w-10 md:w-12">Reps</span>
+                          <span className="text-center w-10 md:w-12">Feito</span>
                         </div>
 
                         {Array.from({ length: parseInt(exercise.sets) }).map((_, i) => {
@@ -511,25 +402,25 @@
                                   placeholder="0"
                                   value={weights[`${exercise.id}`] || ''}
                                   onChange={(e) => handleWeightChange(exercise.id, e.target.value)}
-                                  className="w-full bg-dark border border-border rounded-lg py-2 px-3 text-sm font-mono text-white focus:outline-none focus:border-brand transition-colors"
+                                  className="w-full bg-dark border border-border rounded-lg py-2.5 px-3 text-sm font-bold text-main focus:outline-none focus:border-brand transition-colors shadow-inner"
                                 />
-                                <span className="absolute right-3 top-2.5 text-xs text-gray-600 font-bold">KG</span>
+                                <span className="absolute right-3 top-3 text-[10px] text-muted font-bold pointer-events-none">KG</span>
                               </div>
 
-                              <div className="w-12 h-9 flex items-center justify-center bg-border/50 rounded-lg text-xs font-mono text-gray-300 border border-border">
+                              <div className="w-10 md:w-12 h-10 flex items-center justify-center bg-dark rounded-lg text-xs font-bold text-main border border-border shadow-inner">
                                 {exercise.reps}
                               </div>
 
                               <button
                                 onClick={() => toggleSet(exercise.id, i)}
                                 className={`
-                                  w-9 h-9 rounded-lg flex items-center justify-center border transition-all duration-300
+                                  w-10 md:w-12 h-10 rounded-lg flex items-center justify-center border transition-all duration-300
                                   ${isDone 
-                                    ? 'bg-brand border-brand text-black shadow-[0_0_10px_rgba(204,255,0,0.5)]' 
-                                    : 'bg-dark border-border text-gray-600 hover:border-gray-500'}
+                                    ? 'bg-brand border-brand text-brand-text shadow-brand' 
+                                    : 'bg-dark border-border text-muted hover:border-muted shadow-inner'}
                                 `}
                               >
-                                {isDone && <Check size={16} />}
+                                {isDone && <Check size={18} />}
                               </button>
                             </div>
                           );
@@ -544,15 +435,56 @@
             </div>
           </main>
 
-          {/* FLOAT ACTION BUTTONS */}
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30 w-max animate-fade-in-up">
-            <button onClick={handleExcelCopy} className="group relative flex items-center gap-2 bg-card/90 hover:bg-border text-white border border-border px-4 py-3 rounded-full shadow-lg backdrop-blur-md transition-all active:scale-95">
-              {copyFeedback === 'excel' ? <Check size={20} className="text-brand" /> : <FileSpreadsheet size={20} className="text-gray-400" />}
-              <span className="text-xs font-bold uppercase pr-1">{copyFeedback === 'excel' ? 'Copiado!' : 'Planilha'}</span>
+          {videoModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm animate-fade-in-up transition-colors duration-300">
+              <div className="bg-card w-full max-w-sm rounded-3xl border border-border shadow-2xl overflow-hidden flex flex-col relative transition-colors duration-300">
+                <div className="flex justify-between items-start p-5 border-b border-border bg-dark relative z-10 transition-colors duration-300">
+                  <h3 className="font-bold text-main flex items-center gap-2 pr-6 text-lg leading-tight">
+                    <PlayCircle size={20} className="text-brand shrink-0" /> 
+                    {videoModal}
+                  </h3>
+                  <button onClick={() => setVideoModal(null)} className="absolute top-4 right-4 text-muted hover:text-main bg-card p-1.5 rounded-full border border-border hover:bg-border transition-colors">
+                    <X size={20} />
+                  </button>
+                </div>
+                <div className="p-6 md:p-8 flex flex-col items-center justify-center text-center relative">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-brand/10 blur-[50px] rounded-full pointer-events-none"></div>
+                  <div className="w-20 h-20 bg-dark border border-border text-brand rounded-full flex items-center justify-center mb-5 shadow-brand relative z-10">
+                    <Dumbbell size={36} />
+                  </div>
+                  <h4 className="text-xl font-bold text-main mb-2 relative z-10">Tutorial de Execução</h4>
+                  <p className="text-sm text-muted mb-8 leading-relaxed relative z-10 font-medium">
+                    Para garantir a segurança das suas articulações e do seu pé, veja o vídeo da postura correta no aplicativo do YouTube.
+                  </p>
+                  <a 
+                    href={`https://www.youtube.com/results?search_query=como+fazer+${encodeURIComponent(videoModal)}+execução+correta+musculação`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setVideoModal(null)}
+                    className="w-full flex justify-center items-center gap-2 bg-[#FF0000] hover:bg-red-700 text-white px-6 py-4 rounded-xl font-bold uppercase tracking-wide transition-all shadow-[0_10px_20px_rgba(255,0,0,0.2)] relative z-10"
+                  >
+                    <PlayCircle size={20} />
+                    Assistir no App
+                  </a>
+                  <button 
+                    onClick={() => setVideoModal(null)}
+                    className="mt-4 text-sm font-bold text-muted hover:text-main underline decoration-border underline-offset-4 relative z-10 transition-colors"
+                  >
+                    Voltar para o treino
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="fixed bottom-4 left-0 right-0 px-4 flex justify-center items-center gap-2 md:gap-4 z-30 pointer-events-none animate-fade-in-up">
+            <button onClick={handleExcelCopy} className="pointer-events-auto flex-1 md:flex-none flex justify-center items-center gap-1.5 md:gap-2 bg-card border border-border text-main px-2 md:px-5 py-3.5 rounded-full shadow-lg backdrop-blur-md transition-all active:scale-95 max-w-[160px]">
+              {copyFeedback === 'excel' ? <Check size={18} className="text-brand" /> : <FileSpreadsheet size={18} className="text-muted" />}
+              <span className="text-[10px] md:text-xs font-bold uppercase truncate">{copyFeedback === 'excel' ? 'Copiado' : 'Planilha'}</span>
             </button>
-            <button onClick={handleWhatsAppCopy} className="group relative flex items-center gap-2 bg-brand/90 hover:bg-brand text-black border border-brand px-6 py-3 rounded-full shadow-[0_0_15px_rgba(204,255,0,0.3)] backdrop-blur-md transition-all active:scale-95">
-              {copyFeedback === 'whatsapp' ? <Check size={20} /> : <Share2 size={20} />}
-              <span className="text-xs font-bold uppercase pr-1">{copyFeedback === 'whatsapp' ? 'Copiado!' : 'WhatsApp'}</span>
+            <button onClick={handleWhatsAppCopy} className="pointer-events-auto flex-1 md:flex-none flex justify-center items-center gap-1.5 md:gap-2 bg-brand border-none text-brand-text px-2 md:px-6 py-3.5 rounded-full shadow-[0_0_15px_var(--shadow-color)] backdrop-blur-md transition-all active:scale-95 max-w-[160px]">
+              {copyFeedback === 'whatsapp' ? <Check size={18} /> : <Share2 size={18} />}
+              <span className="text-[10px] md:text-xs font-bold uppercase truncate">{copyFeedback === 'whatsapp' ? 'Copiado' : 'WhatsApp'}</span>
             </button>
           </div>
         </>
@@ -561,8 +493,6 @@
 
     // --- COMPONENTE: DIETA ---
     const DietaView = () => {
-      const [copyFeedback, setCopyFeedback] = useState(false);
-
       const dietPlan = [
         { id: 1, time: "07:30 - 07:45", type: "meal", name: "Café da Manhã", focus: "Zero Frutose / Gorduras Boas", items: ["3 Ovos inteiros (mexidos ou omelete)", "Espinafre ou Couve picada (Fibras/Vitaminas)", "1 colher de sopa de Sementes de Chia (HDL)", "Café puro ou Chá (Zero açúcar/adoçantes)"] },
         { id: 2, time: "08:00", type: "protocol", name: "Protocolo Maizena I", focus: "Estabilidade Glicêmica", items: ["75g de Maizena (Amido de Milho cru) diluída em água"] },
@@ -573,50 +503,22 @@
         { id: 7, time: "00:00", type: "protocol", name: "Protocolo Maizena IV (Ceia)", focus: "Garantia de Sono Seguro", items: ["120g de Maizena diluída em água"] }
       ];
 
-      const copyToWhatsApp = () => {
-        let text = `⚡ *SYSFIT - PLANO ALIMENTAR ADAPTADO* ⚡
-_Atenção: Von Gierke + Masteron_
-
-`;
-        dietPlan.forEach(meal => {
-          const icon = meal.type === 'protocol' ? '💉' : '🍽️';
-          text += `*${icon} ${meal.time} | ${meal.name}*
-🎯 Foco: ${meal.focus}
-`;
-          meal.items.forEach(item => text += `  • ${item}
-`);
-          text += `
-`;
-        });
-        text += `💧 *METAS DIÁRIAS:*
-  • 4 a 5 Litros de Água OBRIGATÓRIO.
-  • Zero frutas/frutose ou açúcar.
-`;
-        
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        try { document.execCommand('copy'); setCopyFeedback(true); setTimeout(() => setCopyFeedback(false), 2000); } catch (err) {}
-        document.body.removeChild(textArea);
-      };
-
       return (
-        <main className="max-w-4xl mx-auto p-4 mt-6 animate-fade-in-up">
+        <main className="max-w-4xl mx-auto p-4 mt-2 md:mt-6 animate-fade-in-up pb-10">
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <div className="bg-red-900/10 border border-red-500/20 rounded-xl p-4 flex gap-3 items-start">
               <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={20} />
               <div>
                 <h3 className="text-red-500 font-bold text-xs uppercase mb-1">Risco Von Gierke</h3>
-                <p className="text-xs text-red-200/70 leading-relaxed">Zero frutas, frutose ou sacarose. Vegetais e pimentão para vitamina C. Fígado blindado.</p>
+                <p className="text-xs text-main opacity-80 leading-relaxed font-medium">Zero frutas, frutose ou sacarose. Vegetais e pimentão para vitamina C. Fígado blindado.</p>
               </div>
             </div>
             <div className="bg-blue-900/10 border border-blue-500/20 rounded-xl p-4 flex gap-3 items-start">
               <Droplet className="text-blue-500 shrink-0 mt-0.5" size={20} />
               <div>
                 <h3 className="text-blue-500 font-bold text-xs uppercase mb-1">Hematócrito & Rins</h3>
-                <p className="text-xs text-blue-200/70 leading-relaxed">Beber de 4 a 5 litros de água por dia é a regra de ouro para dissolver cristais e afinar o sangue.</p>
+                <p className="text-xs text-main opacity-80 leading-relaxed font-medium">Beber de 4 a 5 litros de água por dia é a regra de ouro para dissolver cristais e afinar o sangue.</p>
               </div>
             </div>
           </div>
@@ -625,32 +527,32 @@ _Atenção: Von Gierke + Masteron_
             <div className="absolute left-[27px] top-4 bottom-8 w-px bg-border hidden md:block"></div>
             <div className="space-y-6">
               {dietPlan.map((meal) => (
-                <div key={meal.id} className="relative flex flex-col md:flex-row gap-4 md:gap-6 items-start group">
+                <div key={meal.id} className="relative flex flex-col md:flex-row gap-3 md:gap-6 items-start group">
                   <div className="flex items-center gap-3 md:w-32 shrink-0 relative z-10">
-                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border shadow-lg transition-transform group-hover:scale-105 ${
-                      meal.type === 'protocol' ? 'bg-blue-900/20 border-blue-500/30 text-blue-400' : 'bg-card border-brand/30 text-brand'
+                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center border shadow-lg transition-transform group-hover:scale-105 ${
+                      meal.type === 'protocol' ? 'bg-protocol/10 border-protocol/30 text-protocol' : 'bg-card border-brand/30 text-brand'
                     }`}>
-                      {meal.type === 'protocol' ? <Shield size={24} /> : <Coffee size={24} />}
+                      {meal.type === 'protocol' ? <Shield size={20} /> : <Coffee size={20} />}
                     </div>
-                    <div className="md:hidden font-mono font-bold text-lg text-white">{meal.time}</div>
+                    <div className="md:hidden font-mono font-bold text-base text-main">{meal.time}</div>
                   </div>
-                  <div className={`flex-1 w-full bg-card border rounded-2xl p-5 shadow-lg relative overflow-hidden transition-colors ${
-                    meal.type === 'protocol' ? 'border-blue-900/30 hover:border-blue-500/50' : 'border-border hover:border-brand/50'
+                  <div className={`flex-1 w-full bg-card border rounded-2xl p-4 md:p-5 shadow-sm relative overflow-hidden transition-colors ${
+                    meal.type === 'protocol' ? 'border-protocol/30 hover:border-protocol/50' : 'border-border hover:border-brand/50'
                   }`}>
-                    <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20 pointer-events-none ${
-                      meal.type === 'protocol' ? 'bg-blue-500' : 'bg-brand'
+                    <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-10 pointer-events-none transition-colors duration-300 ${
+                      meal.type === 'protocol' ? 'bg-protocol' : 'bg-brand'
                     }`}></div>
                     <div className="relative z-10">
                       <div className="flex justify-between items-start mb-1">
-                        <h2 className="text-xl font-bold text-white tracking-tight">{meal.name}</h2>
-                        <span className="hidden md:block font-mono font-bold text-gray-500 bg-dark px-2 py-1 rounded border border-border text-sm">{meal.time}</span>
+                        <h2 className="text-lg md:text-xl font-bold text-main tracking-tight">{meal.name}</h2>
+                        <span className="hidden md:block font-mono font-bold text-muted bg-dark px-2 py-1 rounded border border-border text-xs shadow-inner">{meal.time}</span>
                       </div>
-                      <p className={`text-xs font-semibold mb-4 ${meal.type === 'protocol' ? 'text-blue-400' : 'text-brand'}`}>Foco: {meal.focus}</p>
+                      <p className={`text-[11px] md:text-xs font-bold mb-4 uppercase ${meal.type === 'protocol' ? 'text-protocol' : 'text-brand'}`}>Foco: {meal.focus}</p>
                       <ul className="space-y-2">
                         {meal.items.map((item, i) => (
-                          <li key={i} className="flex gap-2 text-sm text-gray-300">
-                            <span className={`shrink-0 mt-1 ${meal.type === 'protocol' ? 'text-blue-500' : 'text-gray-500'}`}>•</span>
-                            <span dangerouslySetInnerHTML={{ __html: item.replace(/\(([^)]+)\)/g, '<span class="text-gray-500 text-xs">($1)</span>') }} />
+                          <li key={i} className="flex gap-2 text-xs md:text-sm text-main font-medium leading-snug opacity-90">
+                            <span className={`shrink-0 mt-0.5 ${meal.type === 'protocol' ? 'text-protocol' : 'text-muted'}`}>•</span>
+                            <span dangerouslySetInnerHTML={{ __html: item.replace(/\(([^)]+)\)/g, '<span class="text-muted text-[10px] md:text-xs">($1)</span>') }} />
                           </li>
                         ))}
                       </ul>
@@ -660,32 +562,9 @@ _Atenção: Von Gierke + Masteron_
               ))}
             </div>
           </div>
-
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30 w-max animate-fade-in-up">
-            <button onClick={copyToWhatsApp} className="group relative flex items-center gap-2 bg-brand/90 hover:bg-brand text-black border border-brand px-6 py-4 rounded-full shadow-[0_0_20px_rgba(204,255,0,0.2)] backdrop-blur-md transition-all active:scale-95 font-bold uppercase tracking-wide">
-              {copyFeedback ? <Check size={20} /> : <Share2 size={20} />}
-              <span>{copyFeedback ? 'Copiado!' : 'Copiar para WhatsApp'}</span>
-            </button>
-          </div>
         </main>
       );
     };
-
-    // CSS
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes fade-in-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-      .animate-fade-in-up { animation: fade-in-up 0.4s ease-out forwards; }
-      .no-scrollbar::-webkit-scrollbar { display: none; }
-      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-      input[type="number"] { -moz-appearance: textfield; }
-      ::-webkit-scrollbar { width: 8px; height: 8px; }
-      ::-webkit-scrollbar-track { background: #050505; }
-      ::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
-      ::-webkit-scrollbar-thumb:hover { background: #333; }
-    `;
-    document.head.appendChild(style);
 
     const container = document.getElementById('root');
     if (container) {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PROJECT TANK - Rastreador de Treino</title>
+  <title>PROJECT TANK - Protocolo (Dark Mode)</title>
   <!-- React & ReactDOM via CDN -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -11,554 +11,553 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Babel para JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#ccff00', // Neon Green
+            dark: '#050505',
+            card: '#111111',
+            border: '#222222'
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body class="m-0 p-0">
+<body class="m-0 p-0 bg-dark text-gray-200">
   <div id="root"></div>
   
   <script type="text/babel">
     const { useState, useEffect } = React;
 
     // --- ÍCONES SVG MANUAIS ---
-    // Definidos manualmente para garantir que funcionem sem dependências externas quebradas
     const IconBase = ({ children, size = 24, className = "" }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    {children}
-  </svg>
-);
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className={className}
+      >
+        {children}
+      </svg>
+    );
 
-const Dumbbell = (props) => (
-  <IconBase {...props}>
-    <path d="m6.5 6.5 11 11" />
-    <path d="m21 21-1-1" />
-    <path d="m3 3 1 1" />
-    <path d="m18 22 4-4" />
-    <path d="m2 6 4-4" />
-    <path d="m3 10 7-7" />
-    <path d="m14 21 7-7" />
-  </IconBase>
-);
+    const Dumbbell = (props) => (
+      <IconBase {...props}>
+        <path d="m6.5 6.5 11 11" />
+        <path d="m21 21-1-1" />
+        <path d="m3 3 1 1" />
+        <path d="m18 22 4-4" />
+        <path d="m2 6 4-4" />
+        <path d="m3 10 7-7" />
+        <path d="m14 21 7-7" />
+      </IconBase>
+    );
 
-const Trophy = (props) => (
-  <IconBase {...props}>
-    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-    <path d="M4 22h16" />
-    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-  </IconBase>
-);
+    const Trophy = (props) => (
+      <IconBase {...props}>
+        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+        <path d="M4 22h16" />
+        <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+        <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+        <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+      </IconBase>
+    );
 
-const AlertCircle = (props) => (
-  <IconBase {...props}>
-    <circle cx="12" cy="12" r="10" />
-    <line x1="12" x2="12" y1="8" y2="12" />
-    <line x1="12" x2="12.01" y1="16" y2="16" />
-  </IconBase>
-);
+    const Info = (props) => (
+      <IconBase {...props}>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 16v-4" />
+        <path d="M12 8h.01" />
+      </IconBase>
+    );
 
-const Info = (props) => (
-  <IconBase {...props}>
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 16v-4" />
-    <path d="M12 8h.01" />
-  </IconBase>
-);
+    const Share2 = (props) => (
+      <IconBase {...props}>
+        <circle cx="18" cy="5" r="3" />
+        <circle cx="6" cy="12" r="3" />
+        <circle cx="18" cy="19" r="3" />
+        <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+        <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
+      </IconBase>
+    );
 
-const Share2 = (props) => (
-  <IconBase {...props}>
-    <circle cx="18" cy="5" r="3" />
-    <circle cx="6" cy="12" r="3" />
-    <circle cx="18" cy="19" r="3" />
-    <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
-    <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
-  </IconBase>
-);
+    const FileSpreadsheet = (props) => (
+      <IconBase {...props}>
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+        <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+        <path d="M8 13h2" />
+        <path d="M14 13h2" />
+        <path d="M8 17h2" />
+        <path d="M14 17h2" />
+      </IconBase>
+    );
 
-const FileSpreadsheet = (props) => (
-  <IconBase {...props}>
-    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-    <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-    <path d="M8 13h2" />
-    <path d="M14 13h2" />
-    <path d="M8 17h2" />
-    <path d="M14 17h2" />
-  </IconBase>
-);
+    const Check = (props) => (
+      <IconBase {...props}>
+        <path d="M20 6 9 17l-5-5" />
+      </IconBase>
+    );
 
-const Check = (props) => (
-  <IconBase {...props}>
-    <path d="M20 6 9 17l-5-5" />
-  </IconBase>
-);
-
-// --- ÍCONES PERSONALIZADOS ---
-const MuscleIcon = ({ group }) => {
-  const colors = {
-    peito: "text-blue-400",
-    costas: "text-emerald-400",
-    pernas: "text-orange-400",
-    ombros: "text-purple-400",
-    bracos: "text-pink-400",
-    cardio: "text-cyan-400"
-  };
-  return <Dumbbell className={colors[group] || "text-slate-400"} size={20} />;
-};
-
-const WorkoutApp = () => {
-  // Detectar dia da semana atual
-  const getDayOfWeek = () => {
-    const dayMap = {
-      0: 'domingo',   // Domingo
-      1: 'segunda',   // Segunda
-      2: 'terca',     // Terça
-      3: 'quarta',    // Quarta
-      4: 'quinta',    // Quinta
-      5: 'sexta',     // Sexta
-      6: 'sabado'     // Sábado
+    // --- ÍCONES PERSONALIZADOS ---
+    const MuscleIcon = ({ group }) => {
+      const colors = {
+        peito: "text-brand",
+        costas: "text-brand",
+        pernas: "text-brand",
+        ombros: "text-brand",
+        bracos: "text-brand",
+        cardio: "text-brand"
+      };
+      return <Dumbbell className={colors[group] || "text-gray-500"} size={20} />;
     };
-    const today = new Date().getDay();
-    return dayMap[today];
-  };
 
-  const [activeDay, setActiveDay] = useState(getDayOfWeek());
-  const [progress, setProgress] = useState({});
-  const [weights, setWeights] = useState({});
-  const [copyFeedback, setCopyFeedback] = useState(null); // 'whatsapp' | 'excel' | null
+    const WorkoutApp = () => {
+      // Detectar dia da semana atual
+      const getDayOfWeek = () => {
+        const dayMap = {
+          0: 'domingo',
+          1: 'segunda',
+          2: 'terca',
+          3: 'quarta',
+          4: 'quinta',
+          5: 'sexta',
+          6: 'sabado'
+        };
+        const today = new Date().getDay();
+        return dayMap[today];
+      };
 
-  // --- ESTRUTURA DO TREINO ---
-  const workoutPlan = {
-    segunda: {
-      title: "Peito & Tríceps (Carga)",
-      focus: "Força e Tensão Mecânica",
-      groups: ["peito", "bracos"],
-      exercises: [
-        { id: 's1', name: "Supino Inclinado com Halteres", sets: "4", reps: "8-10", note: "Banco a 30º. Protege o ombro e foca no peito superior." },
-        { id: 's2', name: "Supino Máquina Articulado", sets: "4", reps: "8-12", note: "Foque em esmagar o peito no topo. Seguro para coluna." },
-        { id: 's3', name: "Crossover Polia Alta", sets: "3", reps: "12-15", note: "Foco na parte inferior do peito." },
-        { id: 's4', name: "Tríceps Testa (Halteres)", sets: "4", reps: "10-12", note: "Deitado no banco. Cotovelos fechados." },
-        { id: 's5', name: "Tríceps Corda", sets: "4", reps: "12-15", note: "Abra a corda no final do movimento." },
-      ]
-    },
-    terca: {
-      title: "Costas & Bíceps (Largura)",
-      focus: "Volume e Pump",
-      groups: ["costas", "bracos"],
-      exercises: [
-        { id: 't1', name: "Puxada Alta (Pegada Aberta)", sets: "4", reps: "10-12", note: "Coluna travada, puxe até o queixo." },
-        { id: 't2', name: "Remada Máquina (Peito Apoiado)", sets: "4", reps: "10-12", note: "CRUCIAL: Peito apoiado para não forçar a coluna." },
-        { id: 't3', name: "Pulldown com Corda", sets: "3", reps: "15", note: "Braços esticados, isola a dorsal." },
-        { id: 't4', name: "Rosca Scott (Máquina)", sets: "4", reps: "10-12", note: "Isolamento total. Não tire o tríceps do apoio." },
-        { id: 't5', name: "Rosca Martelo Sentado", sets: "3", reps: "12", note: "Alternado. Foca no braquial (largura do braço)." },
-      ]
-    },
-    quarta: {
-      title: "Pernas (Segurança)",
-      focus: "Manutenção & Definição",
-      groups: ["pernas"],
-      exercises: [
-        { id: 'q1', name: "Cadeira Extensora", sets: "5", reps: "15-20", note: "Pré-exaustão. Segure 1s no topo." },
-        { id: 'q2', name: "Leg Press 45º", sets: "4", reps: "10-12", note: "ATENÇÃO: Não tire a lombar do banco. Amplitude controlada." },
-        { id: 'q3', name: "Mesa Flexora", sets: "4", reps: "12-15", note: "Contraia bem o posterior." },
-        { id: 'q4', name: "Gemeos em pé", sets: "4", reps: "15-20", note: "Movimento completo." },
-      ]
-    },
-    quinta: {
-      title: "Peito & Ombros (Volume)",
-      focus: "Hipertrofia Metabólica",
-      groups: ["peito", "ombros"],
-      exercises: [
-        { id: 'qi1', name: "Supino Reto com Halteres", sets: "4", reps: "10-12", note: "Alongue bem na descida." },
-        { id: 'qi2', name: "Peck Deck (Voador)", sets: "4", reps: "15", note: "Séries longas para bombear sangue." },
-        { id: 'qi3', name: "Elevação Lateral Sentado", sets: "5", reps: "12-15", note: "Faça sentado para não balançar o tronco." },
-        { id: 'qi4', name: "Desenvolvimento Máquina", sets: "3", reps: "10-12", note: "Mais seguro que barra livre." },
-        { id: 'qi5', name: "Elevação Frontal Cabo", sets: "3", reps: "12", note: "Com corda, passando por baixo das pernas." },
-      ]
-    },
-    sexta: {
-      title: "Costas & Trapézio",
-      focus: "Densidade",
-      groups: ["costas"],
-      exercises: [
-        { id: 'sx1', name: "Puxada Triângulo", sets: "4", reps: "10-12", note: "Foco no miolo das costas." },
-        { id: 'sx2', name: "Remada Baixa (Cabo)", sets: "4", reps: "12", note: "Coluna reta, use o cinto." },
-        { id: 'sx3', name: "Encolhimento com Halteres", sets: "4", reps: "15", note: "Sentado ou em pé com coluna travada." },
-        { id: 'sx4', name: "Facepull (Cabo)", sets: "4", reps: "15", note: "Para saúde do ombro e posterior." },
-      ]
-    },
-    sabado: {
-      title: "Especial Braços (Arm Day)",
-      focus: "Bíceps & Tríceps Super-set",
-      groups: ["bracos"],
-      exercises: [
-        { id: 'sb1', name: "Tríceps Polia Barra V", sets: "4", reps: "12-15", note: "Super-série com o próximo." },
-        { id: 'sb2', name: "Rosca Direta Cabo", sets: "4", reps: "12-15", note: "Cabo mantém tensão constante." },
-        { id: 'sb3', name: "Tríceps Francês Unilateral", sets: "3", reps: "12", note: "Cuidado com o cotovelo." },
-        { id: 'sb4', name: "Rosca Scott (Máquina)", sets: "3", reps: "12", note: "Apoie bem o tríceps. Foco no pico do bíceps." },
-        { id: 'sb5', name: "Rosca Inversa (Antebraço)", sets: "4", reps: "15", note: "Para engrossar o antebraço." },
-      ]
-    },
-    domingo: {
-      title: "Descanso Ativo",
-      focus: "Recuperação & Cardio",
-      groups: ["cardio"],
-      exercises: [
-        { id: 'dm1', name: "Cardio Leve (Bike Horizontal)", sets: "1", reps: "45 min", note: "Mantenha FC em 110-120bpm. Protege a lombar." },
-        { id: 'dm2', name: "Alongamento Geral", sets: "1", reps: "15 min", note: "Foco em posteriores de coxa e peitoral." },
-      ]
-    }
-  };
+      const [activeDay, setActiveDay] = useState(getDayOfWeek());
+      const [progress, setProgress] = useState({});
+      const [weights, setWeights] = useState({});
+      const [copyFeedback, setCopyFeedback] = useState(null);
 
-  const days = [
-    { key: 'segunda', label: 'SEG' },
-    { key: 'terca', label: 'TER' },
-    { key: 'quarta', label: 'QUA' },
-    { key: 'quinta', label: 'QUI' },
-    { key: 'sexta', label: 'SEX' },
-    { key: 'sabado', label: 'SÁB' },
-    { key: 'domingo', label: 'DOM' },
-  ];
+      // --- ESTRUTURA DO TREINO ---
+      const workoutPlan = {
+        segunda: {
+          title: "Treino A1 (Força Bruta)",
+          focus: "Superiores & Core - Alta Carga / 90s a 120s Descanso",
+          groups: ["costas", "peito", "ombros", "bracos"],
+          exercises: [
+            { id: 's1', name: "Puxada Frontal na Polia", sets: "4", reps: "6-8", note: "Carga alta. Descanso de 90 a 120s." },
+            { id: 's2', name: "Supino (Máquina ou Halteres)", sets: "4", reps: "6-8", note: "Descanso de 90 a 120s." },
+            { id: 's3', name: "Remada Curvada (Máquina)", sets: "3", reps: "8-10", note: "Peito apoiado." },
+            { id: 's4', name: "Desenvolvimento Máquina", sets: "3", reps: "8-10", note: "Controle na descida." },
+            { id: 's5', name: "Dead Bug com Halteres", sets: "3", reps: "10/lado", note: "Segure peso no alto. Zero pressão no pé." }
+          ]
+        },
+        terca: {
+          title: "Treino B1 (Força Bruta)",
+          focus: "Inferiores & Aeróbio - Proteção Articular",
+          groups: ["pernas", "cardio"],
+          exercises: [
+            { id: 't1', name: "Leg Press 45º ou Horizontal", sets: "4", reps: "8-10", note: "Apoie toda a planta do pé, força no calcanhar." },
+            { id: 't2', name: "Cadeira Extensora", sets: "4", reps: "8-10", note: "Segure 1s no pico de contração." },
+            { id: 't3', name: "Cadeira Flexora", sets: "4", reps: "8-10", note: "Descida controlada." },
+            { id: 't4', name: "Bicicleta Ergométrica", sets: "1", reps: "20 min", note: "Carga moderada a pesada, RPM constante." }
+          ]
+        },
+        quarta: {
+          title: "Recuperação Ativa",
+          focus: "Limpeza de Lactato & Cardiovascular",
+          groups: ["cardio"],
+          exercises: [
+            { id: 'q1', name: "Bicicleta Ergométrica ou Remo", sets: "1", reps: "30 min", note: "Manter batimentos controlados. Sem impacto." }
+          ]
+        },
+        quinta: {
+          title: "Treino A2 (Hipertrofia)",
+          focus: "Superiores - Tensão Contínua / 90s Descanso",
+          groups: ["peito", "costas", "ombros", "bracos"],
+          exercises: [
+            { id: 'qi1', name: "Supino Inclinado", sets: "4", reps: "8-10", note: "Máquina ou Halteres." },
+            { id: 'qi2', name: "Puxada com Triângulo", sets: "4", reps: "8-10", note: "Polia alta, focar na contração do miolo das costas." },
+            { id: 'qi3', name: "Elevação Lateral", sets: "4", reps: "10-12", note: "Movimento isolado, sem balançar o tronco." },
+            { id: 'qi4', name: "Tríceps Corda + Rosca Martelo", sets: "3", reps: "10-12", note: "Biset: Faça os dois sem descanso entre eles." },
+            { id: 'qi5', name: "Abdominal Supra Curto c/ Anilha", sets: "3", reps: "15", note: "Apoie anilha no peito. Pés relaxados no chão." }
+          ]
+        },
+        sexta: {
+          title: "Treino B2 (Hipertrofia)",
+          focus: "Inferiores & Assimetrias",
+          groups: ["pernas", "cardio"],
+          exercises: [
+            { id: 'sx1', name: "Cadeira Extensora Unilateral", sets: "3", reps: "10/perna", note: "Foco em corrigir assimetrias." },
+            { id: 'sx2', name: "Cadeira Flexora", sets: "4", reps: "10-12", note: "Tensão constante." },
+            { id: 'sx3', name: "Leg Press (Pés Altos)", sets: "3", reps: "10-12", note: "Foco no glúteo e posterior da coxa." },
+            { id: 'sx4', name: "Bicicleta Ergométrica ou Remo", sets: "1", reps: "25 min", note: "Ritmo contínuo." }
+          ]
+        },
+        sabado: {
+          title: "Recuperação Ativa",
+          focus: "Cardiovascular e Controle Lipídico",
+          groups: ["cardio"],
+          exercises: [
+            { id: 'sb1', name: "Bicicleta Ergométrica", sets: "1", reps: "30 min", note: "Fundamental para controle do colesterol." }
+          ]
+        },
+        domingo: {
+          title: "Descanso Total",
+          focus: "Recuperação Sistêmica",
+          groups: [],
+          exercises: [
+            { id: 'dm1', name: "Mobilidade Leve", sets: "1", reps: "15 min", note: "Apenas se sentir necessidade." }
+          ]
+        }
+      };
 
-  // --- LÓGICA DE ESTADO ---
-  const handleWeightChange = (exerciseId, val) => {
-    setWeights(prev => ({ ...prev, [exerciseId]: val }));
-  };
+      const days = [
+        { key: 'segunda', label: 'SEG' },
+        { key: 'terca', label: 'TER' },
+        { key: 'quarta', label: 'QUA' },
+        { key: 'quinta', label: 'QUI' },
+        { key: 'sexta', label: 'SEX' },
+        { key: 'sabado', label: 'SÁB' },
+        { key: 'domingo', label: 'DOM' },
+      ];
 
-  const toggleSet = (exerciseId, setIndex) => {
-    const key = `${activeDay}-${exerciseId}-${setIndex}`;
-    setProgress(prev => ({ ...prev, [key]: !prev[key] }));
-  };
+      // --- LÓGICA DE ESTADO ---
+      const handleWeightChange = (exerciseId, val) => {
+        setWeights(prev => ({ ...prev, [exerciseId]: val }));
+      };
 
-  // --- LÓGICA DE CÓPIA ---
-  const copyToClipboard = (text, type) => {
-    const textArea = document.createElement("textarea");
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-      document.execCommand('copy');
-      setCopyFeedback(type);
-      setTimeout(() => setCopyFeedback(null), 2000);
-    } catch (err) {
-      console.error('Falha ao copiar', err);
-    }
-    document.body.removeChild(textArea);
-  };
+      const toggleSet = (exerciseId, setIndex) => {
+        const key = `${activeDay}-${exerciseId}-${setIndex}`;
+        setProgress(prev => ({ ...prev, [key]: !prev[key] }));
+      };
 
-  const handleWhatsAppCopy = () => {
-    const todayPlan = workoutPlan[activeDay];
-    const date = new Date().toLocaleDateString('pt-BR');
-    
-    let text = `🦾 *PROJECT TANK - ${todayPlan.title}*\n`;
-    text += `📅 Data: ${date}\n`;
-    text += `🎯 Foco: ${todayPlan.focus}\n\n`;
+      // --- LÓGICA DE CÓPIA ---
+      const copyToClipboard = (text, type) => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          setCopyFeedback(type);
+          setTimeout(() => setCopyFeedback(null), 2000);
+        } catch (err) {
+          console.error('Falha ao copiar', err);
+        }
+        document.body.removeChild(textArea);
+      };
 
-    todayPlan.exercises.forEach(ex => {
-      let setsDone = 0;
-      for(let i=0; i<parseInt(ex.sets); i++) {
-        if(progress[`${activeDay}-${ex.id}-${i}`]) setsDone++;
-      }
-      
-      const weight = weights[ex.id] ? `${weights[ex.id]}kg` : '0kg';
-      const statusIcon = setsDone === parseInt(ex.sets) ? '✅' : (setsDone > 0 ? '⚠️' : '❌');
-      
-      text += `${statusIcon} *${ex.name}*\n`;
-      text += `   └ Carga: ${weight} | Feito: ${setsDone}/${ex.sets} séries\n\n`;
-    });
-
-    text += `🚀🚀🚀🚀🚀🚀🚀`;
-    copyToClipboard(text, 'whatsapp');
-  };
-
-  const handleExcelCopy = () => {
-    const todayPlan = workoutPlan[activeDay];
-    const date = new Date().toLocaleDateString('pt-BR');
-    
-    // Cabeçalho para colar no Excel (separado por TAB)
-    // Data | Dia | Exercício | Carga (KG) | Séries Feitas | Meta Reps
-    let text = `Data\tDia\tExercício\tCarga (KG)\tSéries Feitas\tMeta Reps\n`;
-
-    todayPlan.exercises.forEach(ex => {
-      let setsDone = 0;
-      for(let i=0; i<parseInt(ex.sets); i++) {
-        if(progress[`${activeDay}-${ex.id}-${i}`]) setsDone++;
-      }
-      
-      const weight = weights[ex.id] || '0';
-      const dayLabel = days.find(d => d.key === activeDay).label;
-      
-      text += `${date}\t${dayLabel}\t${ex.name}\t${weight}\t${setsDone}/${ex.sets}\t${ex.reps}\n`;
-    });
-
-    copyToClipboard(text, 'excel');
-  };
-
-  // --- CÁLCULO DE PROGRESSO ---
-  const currentExercises = workoutPlan[activeDay].exercises;
-  const totalSets = currentExercises.reduce((acc, ex) => acc + parseInt(ex.sets), 0);
-  const completedCount = currentExercises.reduce((acc, ex) => {
-    let count = 0;
-    for(let i=0; i<parseInt(ex.sets); i++) {
-      if(progress[`${activeDay}-${ex.id}-${i}`]) count++;
-    }
-    return acc + count;
-  }, 0);
-  const percentage = Math.round((completedCount / totalSets) * 100) || 0;
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-blue-500 selection:text-white pb-32">
-      
-      {/* HEADER */}
-      <header className="relative bg-slate-900 border-b border-slate-800 p-6 shadow-2xl">
-        <div className="absolute top-0 right-0 p-32 bg-blue-600/10 blur-[80px] rounded-full pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-black italic tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-300">
-              PROJECT TANK <span className="text-slate-600 text-sm not-italic font-normal">2026</span>
-            </h1>
-            <Trophy className="text-yellow-500 animate-pulse" size={24} />
-          </div>
-          <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">
-            Foco: Peito & Braços • Proteção Lombar
-          </p>
-          
-          <div className="mt-6">
-            <div className="flex justify-between text-xs font-bold mb-1">
-              <span className="text-slate-400">PROGRESSO DO TREINO</span>
-              <span className="text-blue-400">{percentage}%</span>
-            </div>
-            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-500 ease-out shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-                style={{ width: `${percentage}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* SAFETY WARNING */}
-      <div className="max-w-7xl mx-auto p-4">
-        <div className="bg-red-900/20 border border-red-500/20 rounded-lg p-3 flex items-start gap-3">
-          <AlertCircle className="text-red-500 shrink-0" size={20} />
-          <div>
-            <h3 className="text-red-400 font-bold text-xs uppercase mb-1">Protocolo de Segurança</h3>
-            <p className="text-xs text-red-200/70">
-              Evite carga axial. Use máquinas e halteres. Mantenha a coluna neutra.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* DAY SELECTOR */}
-      <div className="sticky top-0 z-20 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50">
-        <div className="max-w-7xl mx-auto overflow-x-auto no-scrollbar py-3 px-4 flex gap-2">
-          {days.map(day => (
-            <button
-              key={day.key}
-              onClick={() => setActiveDay(day.key)}
-              className={`
-                shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300
-                ${activeDay === day.key 
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40 scale-105' 
-                  : 'bg-slate-900 text-slate-500 hover:bg-slate-800 border border-slate-800'}
-              `}
-            >
-              {day.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* WORKOUT CONTENT */}
-      <main className="max-w-7xl mx-auto p-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          
-          {/* SIDEBAR - Desktop Only */}
-          <div className="hidden lg:block">
-            <div className="sticky top-24 space-y-6 animate-fade-in-up">
-              {/* Dia Info */}
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-                <h3 className="text-xs uppercase font-bold text-slate-400 mb-3">Treino do Dia</h3>
-                <div className="flex items-center gap-2 mb-4">
-                  {workoutPlan[activeDay].groups.map(g => (
-                    <span key={g} className="bg-slate-950 border border-slate-700 p-2 rounded-lg">
-                      <MuscleIcon group={g} />
-                    </span>
-                  ))}
-                </div>
-                <p className="text-xs text-slate-300 leading-relaxed">{workoutPlan[activeDay].focus}</p>
-              </div>
-
-              {/* Stats */}
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
-                <h3 className="text-xs uppercase font-bold text-slate-400 mb-3">Estatísticas</h3>
-                <div className="space-y-2 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Total de Séries</span>
-                    <span className="font-bold text-blue-400">{totalSets}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Séries Feitas</span>
-                    <span className="font-bold text-emerald-400">{completedCount}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-400">Progresso</span>
-                    <span className="font-bold text-cyan-400">{percentage}%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* MAIN CONTENT */}
-          <div className="lg:col-span-3">
-            <div className="animate-fade-in-up">
-              <div className="lg:hidden flex items-center gap-2 mb-4">
-                {workoutPlan[activeDay].groups.map(g => (
-                  <span key={g} className="bg-slate-900 border border-slate-700 p-1.5 rounded-lg">
-                    <MuscleIcon group={g} />
-                  </span>
-                ))}
-                <span className="text-sm font-bold text-slate-300 uppercase tracking-wide">
-                  {workoutPlan[activeDay].focus}
-                </span>
-              </div>
-              <h2 className="text-3xl font-bold text-white mb-6">
-                {workoutPlan[activeDay].title}
-              </h2>
-
-              <div className="space-y-4">
-                {workoutPlan[activeDay].exercises.map((exercise, index) => (
-              <div 
-                key={exercise.id} 
-                className="group bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-blue-500/30 transition-all duration-300 shadow-lg relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-all"></div>
-
-                <div className="relative z-10">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-bold text-lg text-slate-100">{exercise.name}</h3>
-                    <div className="text-xs font-mono bg-slate-950 px-2 py-1 rounded text-slate-400 border border-slate-800">
-                      {exercise.sets} Séries
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-blue-300/80 mb-4 flex items-center gap-1">
-                    <Info size={12} /> {exercise.note}
-                  </p>
-
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-[1fr_auto_auto] gap-2 text-[10px] uppercase font-bold text-slate-500 mb-1 px-1">
-                      <span>Carga (KG)</span>
-                      <span className="text-center w-12">Reps</span>
-                      <span className="text-center w-8">Feito</span>
-                    </div>
-
-                    {Array.from({ length: parseInt(exercise.sets) }).map((_, i) => {
-                      const isDone = progress[`${activeDay}-${exercise.id}-${i}`];
-                      return (
-                        <div key={i} className="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
-                          <div className="relative">
-                            <input 
-                              type="number" 
-                              placeholder="0"
-                              value={weights[`${exercise.id}`] || ''}
-                              onChange={(e) => handleWeightChange(exercise.id, e.target.value)}
-                              className="w-full bg-slate-950 border border-slate-800 rounded-lg py-2 px-3 text-sm font-mono text-white focus:outline-none focus:border-blue-500 transition-colors"
-                            />
-                            <span className="absolute right-3 top-2.5 text-xs text-slate-600 font-bold">KG</span>
-                          </div>
-
-                          <div className="w-12 h-9 flex items-center justify-center bg-slate-800/50 rounded-lg text-xs font-mono text-slate-300 border border-slate-800">
-                            {exercise.reps}
-                          </div>
-
-                          <button
-                            onClick={() => toggleSet(exercise.id, i)}
-                            className={`
-                              w-9 h-9 rounded-lg flex items-center justify-center border transition-all duration-300
-                              ${isDone 
-                                ? 'bg-blue-600 border-blue-500 text-white shadow-[0_0_10px_rgba(37,99,235,0.5)]' 
-                                : 'bg-slate-950 border-slate-800 text-slate-700 hover:border-slate-600'}
-                            `}
-                          >
-                            {isDone && <Check size={16} />}
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      {/* FLOAT ACTION BUTTONS */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30 w-max">
+      const handleWhatsAppCopy = () => {
+        const todayPlan = workoutPlan[activeDay];
+        const date = new Date().toLocaleDateString('pt-BR');
         
-        {/* Export Excel */}
-        <button 
-          onClick={handleExcelCopy}
-          className="group relative flex items-center gap-2 bg-emerald-900/90 hover:bg-emerald-800 text-emerald-100 border border-emerald-700 px-4 py-3 rounded-full shadow-lg backdrop-blur-md transition-all active:scale-95"
-        >
-          {copyFeedback === 'excel' ? <Check size={20} /> : <FileSpreadsheet size={20} />}
-          <span className="text-xs font-bold uppercase pr-1">
-            {copyFeedback === 'excel' ? 'Copiado!' : 'Planilha'}
-          </span>
-        </button>
-
-        {/* Export WhatsApp */}
-        <button 
-          onClick={handleWhatsAppCopy}
-          className="group relative flex items-center gap-2 bg-green-600/90 hover:bg-green-500 text-white border border-green-500 px-6 py-3 rounded-full shadow-lg shadow-green-900/50 backdrop-blur-md transition-all active:scale-95"
-        >
-          {copyFeedback === 'whatsapp' ? <Check size={20} /> : <Share2 size={20} />}
-          <span className="text-xs font-bold uppercase pr-1">
-            {copyFeedback === 'whatsapp' ? 'Copiado!' : 'WhatsApp'}
-          </span>
-        </button>
-
-      </div>
-
-    </div>
-  );
-};
-
-// CSS for animations
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes fade-in-up {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-fade-in-up {
-    animation: fade-in-up 0.5s ease-out forwards;
-  }
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+        let text = `⚡ *SYSFIT - ${todayPlan.title}*
 `;
-document.head.appendChild(style);
+        text += `📅 Data: ${date}
+`;
+        text += `🎯 Foco: ${todayPlan.focus}
+
+`;
+
+        todayPlan.exercises.forEach(ex => {
+          let setsDone = 0;
+          for(let i=0; i<parseInt(ex.sets); i++) {
+            if(progress[`${activeDay}-${ex.id}-${i}`]) setsDone++;
+          }
+          
+          const weight = weights[ex.id] ? `${weights[ex.id]}kg` : '0kg';
+          const statusIcon = setsDone === parseInt(ex.sets) ? '✅' : (setsDone > 0 ? '⚠️' : '❌');
+          
+          text += `${statusIcon} *${ex.name}*
+`;
+          text += `   └ Carga: ${weight} | Feito: ${setsDone}/${ex.sets} séries
+
+`;
+        });
+
+        text += `🚀🚀🚀🚀🚀🚀🚀`;
+        copyToClipboard(text, 'whatsapp');
+      };
+
+      const handleExcelCopy = () => {
+        const todayPlan = workoutPlan[activeDay];
+        const date = new Date().toLocaleDateString('pt-BR');
+        
+        let text = `Data	Dia	Exercício	Carga (KG)	Séries Feitas	Meta Reps
+`;
+
+        todayPlan.exercises.forEach(ex => {
+          let setsDone = 0;
+          for(let i=0; i<parseInt(ex.sets); i++) {
+            if(progress[`${activeDay}-${ex.id}-${i}`]) setsDone++;
+          }
+          
+          const weight = weights[ex.id] || '0';
+          const dayLabel = days.find(d => d.key === activeDay).label;
+          
+          text += `${date}	${dayLabel}	${ex.name}	${weight}	${setsDone}/${ex.sets}	${ex.reps}
+`;
+        });
+
+        copyToClipboard(text, 'excel');
+      };
+
+      // --- CÁLCULO DE PROGRESSO ---
+      const currentExercises = workoutPlan[activeDay].exercises;
+      const totalSets = currentExercises.reduce((acc, ex) => acc + parseInt(ex.sets), 0);
+      const completedCount = currentExercises.reduce((acc, ex) => {
+        let count = 0;
+        for(let i=0; i<parseInt(ex.sets); i++) {
+          if(progress[`${activeDay}-${ex.id}-${i}`]) count++;
+        }
+        return acc + count;
+      }, 0);
+      const percentage = Math.round((completedCount / totalSets) * 100) || 0;
+
+      return (
+        <div className="min-h-screen bg-dark text-gray-200 font-sans selection:bg-brand selection:text-black pb-32">
+          
+          {/* HEADER */}
+          <header className="relative bg-card border-b border-border p-6 shadow-2xl">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand/5 blur-[80px] rounded-full pointer-events-none"></div>
+            <div className="max-w-7xl mx-auto relative z-10">
+              <div className="flex items-center justify-between mb-2">
+                <h1 className="text-2xl font-black italic tracking-tighter text-white">
+                  SYS<span className="text-brand">FIT</span>
+                </h1>
+                <Trophy className="text-brand animate-pulse" size={24} />
+              </div>
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-widest">
+                Foco: Força Bruta & Densidade • Blindagem Articular
+              </p>
+              
+              <div className="mt-6">
+                <div className="flex justify-between text-xs font-bold mb-1">
+                  <span className="text-gray-400">PROGRESSO DO TREINO</span>
+                  <span className="text-brand">{percentage}%</span>
+                </div>
+                <div className="h-2 bg-dark rounded-full overflow-hidden border border-border">
+                  <div 
+                    className="h-full bg-brand transition-all duration-500 ease-out shadow-[0_0_10px_rgba(204,255,0,0.5)]"
+                    style={{ width: `${percentage}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* DAY SELECTOR */}
+          <div className="sticky top-0 z-20 bg-dark/90 backdrop-blur-md border-b border-border">
+            <div className="max-w-7xl mx-auto overflow-x-auto no-scrollbar py-3 px-4 flex gap-2">
+              {days.map(day => (
+                <button
+                  key={day.key}
+                  onClick={() => setActiveDay(day.key)}
+                  className={`
+                    shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300
+                    ${activeDay === day.key 
+                      ? 'bg-brand text-black shadow-lg shadow-brand/20 scale-105' 
+                      : 'bg-card text-gray-400 hover:bg-border border border-border'}
+                  `}
+                >
+                  {day.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* WORKOUT CONTENT */}
+          <main className="max-w-7xl mx-auto p-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              
+              {/* SIDEBAR - Desktop Only */}
+              <div className="hidden lg:block">
+                <div className="sticky top-24 space-y-6 animate-fade-in-up">
+                  {/* Dia Info */}
+                  <div className="bg-card border border-border rounded-2xl p-4">
+                    <h3 className="text-xs uppercase font-bold text-gray-500 mb-3">Treino do Dia</h3>
+                    <div className="flex items-center gap-2 mb-4">
+                      {workoutPlan[activeDay].groups.map(g => (
+                        <span key={g} className="bg-dark border border-border p-2 rounded-lg">
+                          <MuscleIcon group={g} />
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-400 leading-relaxed">{workoutPlan[activeDay].focus}</p>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="bg-card border border-border rounded-2xl p-4">
+                    <h3 className="text-xs uppercase font-bold text-gray-500 mb-3">Estatísticas</h3>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Total de Séries</span>
+                        <span className="font-bold text-white">{totalSets}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Séries Feitas</span>
+                        <span className="font-bold text-white">{completedCount}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Progresso</span>
+                        <span className="font-bold text-brand">{percentage}%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* MAIN CONTENT */}
+              <div className="lg:col-span-3">
+                <div className="animate-fade-in-up">
+                  <div className="lg:hidden flex items-center gap-2 mb-4">
+                    {workoutPlan[activeDay].groups.map(g => (
+                      <span key={g} className="bg-card border border-border p-1.5 rounded-lg">
+                        <MuscleIcon group={g} />
+                      </span>
+                    ))}
+                    <span className="text-sm font-bold text-gray-400 uppercase tracking-wide">
+                      {workoutPlan[activeDay].focus}
+                    </span>
+                  </div>
+                  <h2 className="text-3xl font-bold text-white mb-6">
+                    {workoutPlan[activeDay].title}
+                  </h2>
+
+                  <div className="space-y-4">
+                    {workoutPlan[activeDay].exercises.map((exercise, index) => (
+                  <div 
+                    key={exercise.id} 
+                    className="group bg-card border border-border rounded-2xl p-5 hover:border-brand/50 transition-all duration-300 shadow-lg relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-2xl group-hover:bg-brand/10 transition-all"></div>
+
+                    <div className="relative z-10">
+                      <div className="flex justify-between items-start mb-3">
+                        <h3 className="font-bold text-lg text-white">{exercise.name}</h3>
+                        <div className="text-xs font-mono bg-dark px-2 py-1 rounded text-gray-400 border border-border">
+                          {exercise.sets} Séries
+                        </div>
+                      </div>
+
+                      <p className="text-xs text-gray-400 mb-4 flex items-center gap-1">
+                        <Info size={12} className="text-brand" /> {exercise.note}
+                      </p>
+
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-[1fr_auto_auto] gap-2 text-[10px] uppercase font-bold text-gray-500 mb-1 px-1">
+                          <span>Carga (KG)</span>
+                          <span className="text-center w-12">Reps</span>
+                          <span className="text-center w-8">Feito</span>
+                        </div>
+
+                        {Array.from({ length: parseInt(exercise.sets) }).map((_, i) => {
+                          const isDone = progress[`${activeDay}-${exercise.id}-${i}`];
+                          return (
+                            <div key={i} className="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
+                              <div className="relative">
+                                <input 
+                                  type="number" 
+                                  placeholder="0"
+                                  value={weights[`${exercise.id}`] || ''}
+                                  onChange={(e) => handleWeightChange(exercise.id, e.target.value)}
+                                  className="w-full bg-dark border border-border rounded-lg py-2 px-3 text-sm font-mono text-white focus:outline-none focus:border-brand transition-colors"
+                                />
+                                <span className="absolute right-3 top-2.5 text-xs text-gray-600 font-bold">KG</span>
+                              </div>
+
+                              <div className="w-12 h-9 flex items-center justify-center bg-border/50 rounded-lg text-xs font-mono text-gray-300 border border-border">
+                                {exercise.reps}
+                              </div>
+
+                              <button
+                                onClick={() => toggleSet(exercise.id, i)}
+                                className={`
+                                  w-9 h-9 rounded-lg flex items-center justify-center border transition-all duration-300
+                                  ${isDone 
+                                    ? 'bg-brand border-brand text-black shadow-[0_0_10px_rgba(204,255,0,0.5)]' 
+                                    : 'bg-dark border-border text-gray-600 hover:border-gray-500'}
+                                `}
+                              >
+                                {isDone && <Check size={16} />}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+                </div>
+              </div>
+            </div>
+          </main>
+
+          {/* FLOAT ACTION BUTTONS */}
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30 w-max">
+            
+            {/* Export Excel */}
+            <button 
+              onClick={handleExcelCopy}
+              className="group relative flex items-center gap-2 bg-card/90 hover:bg-border text-white border border-border px-4 py-3 rounded-full shadow-lg backdrop-blur-md transition-all active:scale-95"
+            >
+              {copyFeedback === 'excel' ? <Check size={20} className="text-brand" /> : <FileSpreadsheet size={20} className="text-gray-400" />}
+              <span className="text-xs font-bold uppercase pr-1">
+                {copyFeedback === 'excel' ? 'Copiado!' : 'Planilha'}
+              </span>
+            </button>
+
+            {/* Export WhatsApp */}
+            <button 
+              onClick={handleWhatsAppCopy}
+              className="group relative flex items-center gap-2 bg-brand/90 hover:bg-brand text-black border border-brand px-6 py-3 rounded-full shadow-[0_0_15px_rgba(204,255,0,0.3)] backdrop-blur-md transition-all active:scale-95"
+            >
+              {copyFeedback === 'whatsapp' ? <Check size={20} /> : <Share2 size={20} />}
+              <span className="text-xs font-bold uppercase pr-1">
+                {copyFeedback === 'whatsapp' ? 'Copiado!' : 'WhatsApp'}
+              </span>
+            </button>
+
+          </div>
+
+        </div>
+      );
+    };
+
+    // CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fade-in-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in-up {
+        animation: fade-in-up 0.5s ease-out forwards;
+      }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      /* Remove setas do input number */
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      input[type="number"] {
+        -moz-appearance: textfield;
+      }
+    `;
+    document.head.appendChild(style);
 
     const container = document.getElementById('root');
     if (container) {

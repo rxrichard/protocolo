@@ -62,7 +62,8 @@
             dark: 'var(--bg-base)',
             card: 'var(--bg-card)',
             border: 'var(--border-color)',
-            protocol: '#3b82f6'
+            protocol: '#3b82f6',
+            alert: '#ef4444'
           },
           textColor: {
             main: 'var(--text-main)',
@@ -83,7 +84,6 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    // Ícones
     const IconBase = ({ children, size = 24, className = "" }) => (
       <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
         {children}
@@ -106,6 +106,9 @@
     const X = (props) => <IconBase {...props}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></IconBase>;
     const Sun = (props) => <IconBase {...props}><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></IconBase>;
     const Moon = (props) => <IconBase {...props}><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></IconBase>;
+    const Book = (props) => <IconBase {...props}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></IconBase>;
+    const Clock = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></IconBase>;
+    const Flame = (props) => <IconBase {...props}><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></IconBase>;
 
     const MuscleIcon = ({ group }) => {
       const colors = { peito: "text-brand", costas: "text-brand", pernas: "text-brand", ombros: "text-brand", bracos: "text-brand", cardio: "text-brand" };
@@ -113,15 +116,12 @@
     };
 
     const AppContainer = () => {
-      const [currentView, setCurrentView] = useState('treino'); 
+      const [currentView, setCurrentView] = useState('dieta'); 
       const [isDark, setIsDark] = useState(true);
 
       useEffect(() => {
-        if (isDark) {
-          document.documentElement.classList.add('dark');
-        } else {
-          document.documentElement.classList.remove('dark');
-        }
+        if (isDark) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
       }, [isDark]);
 
       return (
@@ -129,7 +129,6 @@
           <header className="relative bg-card border-b border-border p-5 md:p-6 shadow-sm transition-colors duration-300 overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-brand/10 blur-[80px] rounded-full pointer-events-none transition-all duration-300"></div>
             <div className="max-w-7xl mx-auto relative z-10 flex flex-col gap-5">
-              
               <div className="flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-1">
@@ -138,45 +137,33 @@
                     </h1>
                   </div>
                   <p className="text-[10px] md:text-xs text-muted font-bold uppercase tracking-widest flex items-center gap-1.5">
-                    {currentView === 'treino' ? <Trophy size={12} className="text-brand" /> : <Activity size={12} className="text-brand" />}
-                    {currentView === 'treino' ? 'PROTOCOLO HORMONAL' : 'NUTRIÇÃO CLÍNICA'}
+                    {currentView === 'treino' && <><Trophy size={12} className="text-brand" /> PROTOCOLO HORMONAL</>}
+                    {currentView === 'dieta' && <><Activity size={12} className="text-brand" /> LINHA DO TEMPO CLÍNICA</>}
+                    {currentView === 'receitas' && <><Book size={12} className="text-brand" /> BASE DE DADOS (RECEITAS)</>}
                   </p>
                 </div>
-                
-                <button 
-                  onClick={() => setIsDark(!isDark)} 
-                  className="p-2.5 rounded-full bg-dark border border-border text-muted hover:text-main transition-colors shadow-sm"
-                  aria-label="Toggle Theme"
-                >
+                <button onClick={() => setIsDark(!isDark)} className="p-2.5 rounded-full bg-dark border border-border text-muted hover:text-main transition-colors shadow-sm" aria-label="Toggle Theme">
                   {isDark ? <Sun size={18} /> : <Moon size={18} />}
                 </button>
               </div>
 
-              <div className="flex bg-dark p-1.5 rounded-xl border border-border w-full shadow-inner">
-                <button 
-                  onClick={() => setCurrentView('treino')}
-                  className={`flex-1 flex justify-center items-center gap-2 px-2 py-3 rounded-lg text-xs md:text-sm font-bold transition-all duration-300 ${
-                    currentView === 'treino' ? 'bg-brand text-brand-text shadow-brand' : 'text-muted hover:text-main'
-                  }`}
-                >
-                  <Dumbbell size={16} />
-                  TREINO
+              <div className="flex bg-dark p-1.5 rounded-xl border border-border w-full shadow-inner overflow-x-auto no-scrollbar">
+                <button onClick={() => setCurrentView('treino')} className={`flex-1 min-w-[100px] flex justify-center items-center gap-2 px-2 py-3 rounded-lg text-[11px] md:text-sm font-bold transition-all duration-300 ${currentView === 'treino' ? 'bg-brand text-brand-text shadow-brand' : 'text-muted hover:text-main'}`}>
+                  <Dumbbell size={16} /> TREINO
                 </button>
-                <button 
-                  onClick={() => setCurrentView('dieta')}
-                  className={`flex-1 flex justify-center items-center gap-2 px-2 py-3 rounded-lg text-xs md:text-sm font-bold transition-all duration-300 ${
-                    currentView === 'dieta' ? 'bg-brand text-brand-text shadow-brand' : 'text-muted hover:text-main'
-                  }`}
-                >
-                  <Apple size={16} />
-                  DIETA
+                <button onClick={() => setCurrentView('dieta')} className={`flex-1 min-w-[100px] flex justify-center items-center gap-2 px-2 py-3 rounded-lg text-[11px] md:text-sm font-bold transition-all duration-300 ${currentView === 'dieta' ? 'bg-brand text-brand-text shadow-brand' : 'text-muted hover:text-main'}`}>
+                  <Clock size={16} /> ROTINA
+                </button>
+                <button onClick={() => setCurrentView('receitas')} className={`flex-1 min-w-[100px] flex justify-center items-center gap-2 px-2 py-3 rounded-lg text-[11px] md:text-sm font-bold transition-all duration-300 ${currentView === 'receitas' ? 'bg-brand text-brand-text shadow-brand' : 'text-muted hover:text-main'}`}>
+                  <Book size={16} /> RECEITAS
                 </button>
               </div>
-
             </div>
           </header>
 
-          {currentView === 'treino' ? <TreinoView /> : <DietaView />}
+          {currentView === 'treino' && <TreinoView />}
+          {currentView === 'dieta' && <DietaView />}
+          {currentView === 'receitas' && <ReceitasView />}
 
         </div>
       );
@@ -207,22 +194,14 @@
       const days = [ { key: 'segunda', label: 'SEG' }, { key: 'terca', label: 'TER' }, { key: 'quarta', label: 'QUA' }, { key: 'quinta', label: 'QUI' }, { key: 'sexta', label: 'SEX' }, { key: 'sabado', label: 'SÁB' }, { key: 'domingo', label: 'DOM' } ];
 
       const handleWeightChange = (exerciseId, val) => setWeights(prev => ({ ...prev, [exerciseId]: val }));
-      
-      const toggleSet = (exerciseId, setIndex) => {
-        const key = `${activeDay}-${exerciseId}-${setIndex}`;
-        setProgress(prev => ({ ...prev, [key]: !prev[key] }));
-      };
+      const toggleSet = (exerciseId, setIndex) => setProgress(prev => ({ ...prev, [`${activeDay}-${exerciseId}-${setIndex}`]: !prev[`${activeDay}-${exerciseId}-${setIndex}`] }));
 
       const copyToClipboard = (text, type) => {
         const textArea = document.createElement("textarea");
         textArea.value = text;
         document.body.appendChild(textArea);
         textArea.select();
-        try { 
-          document.execCommand('copy'); 
-          setCopyFeedback(type); 
-          setTimeout(() => setCopyFeedback(null), 2000); 
-        } catch (err) {}
+        try { document.execCommand('copy'); setCopyFeedback(type); setTimeout(() => setCopyFeedback(null), 2000); } catch (err) {}
         document.body.removeChild(textArea);
       };
 
@@ -275,16 +254,7 @@
           <div className="sticky top-0 z-20 bg-dark/95 backdrop-blur-md border-b border-border shadow-sm transition-colors duration-300">
             <div className="max-w-7xl mx-auto overflow-x-auto no-scrollbar py-3 px-4 flex gap-2">
               {days.map(day => (
-                <button
-                  key={day.key}
-                  onClick={() => setActiveDay(day.key)}
-                  className={`
-                    shrink-0 px-5 py-2.5 rounded-full text-[11px] md:text-xs font-bold transition-all duration-300
-                    ${activeDay === day.key 
-                      ? 'bg-brand text-brand-text shadow-brand scale-105' 
-                      : 'bg-card text-muted hover:bg-border border border-border'}
-                  `}
-                >
+                <button key={day.key} onClick={() => setActiveDay(day.key)} className={`shrink-0 px-5 py-2.5 rounded-full text-[11px] md:text-xs font-bold transition-all duration-300 ${activeDay === day.key ? 'bg-brand text-brand-text shadow-brand scale-105' : 'bg-card text-muted hover:bg-border border border-border'}`}>
                   {day.label}
                 </button>
               ))}
@@ -303,37 +273,25 @@
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              
               <div className="hidden lg:block">
                 <div className="sticky top-28 space-y-6 animate-fade-in-up">
-                  <div className="bg-card border border-border rounded-2xl p-5 transition-colors duration-300 shadow-sm">
+                  <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
                     <h3 className="text-xs uppercase font-bold text-muted mb-4">Treino do Dia</h3>
                     <div className="flex items-center gap-2 mb-4 flex-wrap">
                       {workoutPlan[activeDay].groups.map(g => (
-                        <span key={g} className="bg-dark border border-border px-3 py-1.5 rounded-md flex items-center gap-1.5 text-xs font-bold uppercase text-main shadow-sm transition-colors duration-300">
-                          {g === 'cardio' ? <Activity size={14} className="text-brand" /> : <Dumbbell size={14} className="text-brand" />}
-                          {g}
+                        <span key={g} className="bg-dark border border-border px-3 py-1.5 rounded-md flex items-center gap-1.5 text-xs font-bold uppercase text-main shadow-sm">
+                          {g === 'cardio' ? <Activity size={14} className="text-brand" /> : <Dumbbell size={14} className="text-brand" />} {g}
                         </span>
                       ))}
                     </div>
                     <p className="text-sm text-muted leading-relaxed font-medium">{workoutPlan[activeDay].focus}</p>
                   </div>
-
-                  <div className="bg-card border border-border rounded-2xl p-5 transition-colors duration-300 shadow-sm">
+                  <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
                     <h3 className="text-xs uppercase font-bold text-muted mb-4">Estatísticas</h3>
                     <div className="space-y-3 text-sm font-medium">
-                      <div className="flex justify-between">
-                        <span className="text-muted">Total de Séries</span>
-                        <span className="font-bold text-main">{totalSets}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted">Séries Feitas</span>
-                        <span className="font-bold text-main">{completedCount}</span>
-                      </div>
-                      <div className="flex justify-between pt-2 border-t border-border">
-                        <span className="text-muted">Progresso</span>
-                        <span className="font-bold text-brand text-lg">{percentage}%</span>
-                      </div>
+                      <div className="flex justify-between"><span className="text-muted">Total de Séries</span><span className="font-bold text-main">{totalSets}</span></div>
+                      <div className="flex justify-between"><span className="text-muted">Séries Feitas</span><span className="font-bold text-main">{completedCount}</span></div>
+                      <div className="flex justify-between pt-2 border-t border-border"><span className="text-muted">Progresso</span><span className="font-bold text-brand text-lg">{percentage}%</span></div>
                     </div>
                   </div>
                 </div>
@@ -341,95 +299,54 @@
 
               <div className="lg:col-span-3">
                 <div className="animate-fade-in-up">
-                  
                   <div className="lg:hidden flex items-center gap-2 mb-4 flex-wrap">
                     {workoutPlan[activeDay].groups.map(g => (
-                      <span key={g} className="bg-card border border-border px-2.5 py-1.5 rounded-md flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase text-main shadow-sm transition-colors duration-300">
-                        {g === 'cardio' ? <Activity size={12} className="text-brand" /> : <Dumbbell size={12} className="text-brand" />}
-                        {g}
+                      <span key={g} className="bg-card border border-border px-2.5 py-1.5 rounded-md flex items-center gap-1.5 text-[10px] md:text-xs font-bold uppercase text-main shadow-sm">
+                        {g === 'cardio' ? <Activity size={12} className="text-brand" /> : <Dumbbell size={12} className="text-brand" />} {g}
                       </span>
                     ))}
                   </div>
-                  
-                  <h2 className="text-2xl md:text-3xl font-bold text-main mb-2">
-                    {workoutPlan[activeDay].title}
-                  </h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-main mb-2">{workoutPlan[activeDay].title}</h2>
                   <p className="text-sm text-muted mb-6 lg:hidden font-medium">{workoutPlan[activeDay].focus}</p>
 
                   <div className="space-y-4">
                     {workoutPlan[activeDay].exercises.map((exercise, index) => (
-                  <div key={exercise.id} className="group bg-card border border-border rounded-2xl p-4 md:p-5 hover:border-brand/50 transition-all duration-300 shadow-sm relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-2xl group-hover:bg-brand/10 transition-all"></div>
-                    
-                    <div className="relative z-10">
-                      <div className="flex justify-between items-start mb-3">
-                        <div 
-                          className="flex items-center gap-2.5 cursor-pointer group/title w-max pr-2"
-                          onClick={() => setVideoModal(exercise.name)}
-                        >
-                          <h3 className="font-bold text-[15px] md:text-lg text-main group-hover/title:text-brand transition-colors leading-tight">
-                            {exercise.name}
-                          </h3>
-                          <div className="bg-brand/20 p-1.5 rounded-full text-brand group-hover/title:bg-brand group-hover/title:text-brand-text transition-colors shadow-brand">
-                            <PlayCircle size={16} />
+                      <div key={exercise.id} className="group bg-card border border-border rounded-2xl p-4 md:p-5 hover:border-brand/50 transition-all duration-300 shadow-sm relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-2xl group-hover:bg-brand/10 transition-all"></div>
+                        <div className="relative z-10">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="flex items-center gap-2.5 cursor-pointer group/title w-max pr-2" onClick={() => setVideoModal(exercise.name)}>
+                              <h3 className="font-bold text-[15px] md:text-lg text-main group-hover/title:text-brand transition-colors leading-tight">{exercise.name}</h3>
+                              <div className="bg-brand/20 p-1.5 rounded-full text-brand group-hover/title:bg-brand group-hover/title:text-brand-text transition-colors shadow-brand"><PlayCircle size={16} /></div>
+                            </div>
+                            <div className="text-[10px] font-bold bg-dark px-2.5 py-1.5 rounded-md text-muted border border-border shrink-0 mt-0.5 shadow-inner">{exercise.sets} Séries</div>
+                          </div>
+                          <p className="text-xs text-muted mb-5 flex items-start gap-1.5 leading-snug">
+                            <Info size={14} className="text-brand shrink-0 mt-0.5" /> 
+                            <span dangerouslySetInnerHTML={{ __html: exercise.note.replace('Zero pressão no pé', '<strong class="text-brand">Zero pressão no pé</strong>') }}></span>
+                          </p>
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-[1fr_auto_auto] gap-2 text-[10px] uppercase font-bold text-muted mb-1 px-1"><span>Carga (KG)</span><span className="text-center w-10 md:w-12">Reps</span><span className="text-center w-10 md:w-12">Feito</span></div>
+                            {Array.from({ length: parseInt(exercise.sets) }).map((_, i) => {
+                              const isDone = progress[`${activeDay}-${exercise.id}-${i}`];
+                              return (
+                                <div key={i} className="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
+                                  <div className="relative">
+                                    <input type="number" placeholder="0" value={weights[`${exercise.id}`] || ''} onChange={(e) => handleWeightChange(exercise.id, e.target.value)} className="w-full bg-dark border border-border rounded-lg py-2.5 px-3 text-sm font-bold text-main focus:outline-none focus:border-brand transition-colors shadow-inner" />
+                                    <span className="absolute right-3 top-3 text-[10px] text-muted font-bold pointer-events-none">KG</span>
+                                  </div>
+                                  <div className="w-10 md:w-12 h-10 flex items-center justify-center bg-dark rounded-lg text-xs font-bold text-main border border-border shadow-inner">{exercise.reps}</div>
+                                  <button onClick={() => toggleSet(exercise.id, i)} className={`w-10 md:w-12 h-10 rounded-lg flex items-center justify-center border transition-all duration-300 ${isDone ? 'bg-brand border-brand text-brand-text shadow-brand' : 'bg-dark border-border text-muted hover:border-muted shadow-inner'}`}>
+                                    {isDone && <Check size={18} />}
+                                  </button>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
-
-                        <div className="text-[10px] font-bold bg-dark px-2.5 py-1.5 rounded-md text-muted border border-border shrink-0 mt-0.5 shadow-inner">
-                          {exercise.sets} Séries
-                        </div>
                       </div>
-
-                      <p className="text-xs text-muted mb-5 flex items-start gap-1.5 leading-snug">
-                        <Info size={14} className="text-brand shrink-0 mt-0.5" /> 
-                        <span dangerouslySetInnerHTML={{ __html: exercise.note.replace('Zero pressão no pé', '<strong class="text-brand">Zero pressão no pé</strong>') }}></span>
-                      </p>
-
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-[1fr_auto_auto] gap-2 text-[10px] uppercase font-bold text-muted mb-1 px-1">
-                          <span>Carga (KG)</span>
-                          <span className="text-center w-10 md:w-12">Reps</span>
-                          <span className="text-center w-10 md:w-12">Feito</span>
-                        </div>
-
-                        {Array.from({ length: parseInt(exercise.sets) }).map((_, i) => {
-                          const isDone = progress[`${activeDay}-${exercise.id}-${i}`];
-                          return (
-                            <div key={i} className="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
-                              <div className="relative">
-                                <input 
-                                  type="number" 
-                                  placeholder="0"
-                                  value={weights[`${exercise.id}`] || ''}
-                                  onChange={(e) => handleWeightChange(exercise.id, e.target.value)}
-                                  className="w-full bg-dark border border-border rounded-lg py-2.5 px-3 text-sm font-bold text-main focus:outline-none focus:border-brand transition-colors shadow-inner"
-                                />
-                                <span className="absolute right-3 top-3 text-[10px] text-muted font-bold pointer-events-none">KG</span>
-                              </div>
-
-                              <div className="w-10 md:w-12 h-10 flex items-center justify-center bg-dark rounded-lg text-xs font-bold text-main border border-border shadow-inner">
-                                {exercise.reps}
-                              </div>
-
-                              <button
-                                onClick={() => toggleSet(exercise.id, i)}
-                                className={`
-                                  w-10 md:w-12 h-10 rounded-lg flex items-center justify-center border transition-all duration-300
-                                  ${isDone 
-                                    ? 'bg-brand border-brand text-brand-text shadow-brand' 
-                                    : 'bg-dark border-border text-muted hover:border-muted shadow-inner'}
-                                `}
-                              >
-                                {isDone && <Check size={18} />}
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
                 </div>
               </div>
             </div>
@@ -437,41 +354,18 @@
 
           {videoModal && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[var(--overlay)] backdrop-blur-sm animate-fade-in-up transition-colors duration-300">
-              <div className="bg-card w-full max-w-sm rounded-3xl border border-border shadow-2xl overflow-hidden flex flex-col relative transition-colors duration-300">
-                <div className="flex justify-between items-start p-5 border-b border-border bg-dark relative z-10 transition-colors duration-300">
-                  <h3 className="font-bold text-main flex items-center gap-2 pr-6 text-lg leading-tight">
-                    <PlayCircle size={20} className="text-brand shrink-0" /> 
-                    {videoModal}
-                  </h3>
-                  <button onClick={() => setVideoModal(null)} className="absolute top-4 right-4 text-muted hover:text-main bg-card p-1.5 rounded-full border border-border hover:bg-border transition-colors">
-                    <X size={20} />
-                  </button>
+              <div className="bg-card w-full max-w-sm rounded-3xl border border-border shadow-2xl overflow-hidden flex flex-col relative">
+                <div className="flex justify-between items-start p-5 border-b border-border bg-dark relative z-10">
+                  <h3 className="font-bold text-main flex items-center gap-2 pr-6 text-lg leading-tight"><PlayCircle size={20} className="text-brand shrink-0" /> {videoModal}</h3>
+                  <button onClick={() => setVideoModal(null)} className="absolute top-4 right-4 text-muted hover:text-main bg-card p-1.5 rounded-full border border-border hover:bg-border transition-colors"><X size={20} /></button>
                 </div>
                 <div className="p-6 md:p-8 flex flex-col items-center justify-center text-center relative">
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-brand/10 blur-[50px] rounded-full pointer-events-none"></div>
-                  <div className="w-20 h-20 bg-dark border border-border text-brand rounded-full flex items-center justify-center mb-5 shadow-brand relative z-10">
-                    <Dumbbell size={36} />
-                  </div>
+                  <div className="w-20 h-20 bg-dark border border-border text-brand rounded-full flex items-center justify-center mb-5 shadow-brand relative z-10"><Dumbbell size={36} /></div>
                   <h4 className="text-xl font-bold text-main mb-2 relative z-10">Tutorial de Execução</h4>
-                  <p className="text-sm text-muted mb-8 leading-relaxed relative z-10 font-medium">
-                    Para garantir a segurança das suas articulações e do seu pé, veja o vídeo da postura correta no aplicativo do YouTube.
-                  </p>
-                  <a 
-                    href={`https://www.youtube.com/results?search_query=como+fazer+${encodeURIComponent(videoModal)}+execução+correta+musculação`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setVideoModal(null)}
-                    className="w-full flex justify-center items-center gap-2 bg-[#FF0000] hover:bg-red-700 text-white px-6 py-4 rounded-xl font-bold uppercase tracking-wide transition-all shadow-[0_10px_20px_rgba(255,0,0,0.2)] relative z-10"
-                  >
-                    <PlayCircle size={20} />
-                    Assistir no App
-                  </a>
-                  <button 
-                    onClick={() => setVideoModal(null)}
-                    className="mt-4 text-sm font-bold text-muted hover:text-main underline decoration-border underline-offset-4 relative z-10 transition-colors"
-                  >
-                    Voltar para o treino
-                  </button>
+                  <p className="text-sm text-muted mb-8 leading-relaxed relative z-10 font-medium">Veja o vídeo da postura correta no aplicativo do YouTube para proteção articular.</p>
+                  <a href={`https://www.youtube.com/results?search_query=como+fazer+${encodeURIComponent(videoModal)}+execução+correta+musculação`} target="_blank" rel="noopener noreferrer" onClick={() => setVideoModal(null)} className="w-full flex justify-center items-center gap-2 bg-[#FF0000] hover:bg-red-700 text-white px-6 py-4 rounded-xl font-bold uppercase tracking-wide transition-all shadow-[0_10px_20px_rgba(255,0,0,0.2)] relative z-10"><PlayCircle size={20} /> Assistir no App</a>
+                  <button onClick={() => setVideoModal(null)} className="mt-4 text-sm font-bold text-muted hover:text-main underline decoration-border underline-offset-4 relative z-10">Voltar para o treino</button>
                 </div>
               </div>
             </div>
@@ -491,34 +385,37 @@
       );
     };
 
-    // --- COMPONENTE: DIETA ---
     const DietaView = () => {
       const dietPlan = [
-        { id: 1, time: "07:30 - 07:45", type: "meal", name: "Café da Manhã", focus: "Zero Frutose / Gorduras Boas", items: ["3 Ovos inteiros (mexidos ou omelete)", "Espinafre ou Couve picada (Fibras/Vitaminas)", "1 colher de sopa de Sementes de Chia (HDL)", "Café puro ou Chá (Zero açúcar/adoçantes)"] },
-        { id: 2, time: "08:00", type: "protocol", name: "Protocolo Maizena I", focus: "Estabilidade Glicêmica", items: ["75g de Maizena (Amido de Milho cru) diluída em água"] },
-        { id: 3, time: "11:30 - 12:30", type: "meal", name: "Almoço", focus: "Construção Muscular & Fibras", items: ["200g Peito de Frango, Tilápia ou Merluza", "Salada Verde Escura à vontade (Rúcula, Alface, Agrião)", "Pimentão Amarelo ou Vermelho cru (Vitamina C para ácido úrico)", "1 colher de sopa de Azeite Extra Virgem"] },
-        { id: 4, time: "16:00", type: "protocol", name: "Protocolo Maizena II + Anabolismo", focus: "Glicemia + Hipertrofia", items: ["75g de Maizena diluída em água", "1 Scoop (30g) de Whey Protein Isolado (Adoçado c/ sucralose ou stevia - NUNCA frutose)"] },
-        { id: 5, time: "17:30 - 18:00", type: "meal", name: "Jantar", focus: "Digestão Limpa & Anti-inflamatório", items: ["150g a 200g Frango desfiado, Lombo suíno magro ou Atum (água)", "150g Brócolis, Couve-flor ou Vagem (Fibra para saciedade noturna)", "Temperos essenciais: Cúrcuma (Açafrão) e Pimenta-do-reino"] },
-        { id: 6, time: "20:00", type: "protocol", name: "Protocolo Maizena III", focus: "Prevenção Glicêmica", items: ["75g de Maizena diluída em água"] },
-        { id: 7, time: "00:00", type: "protocol", name: "Protocolo Maizena IV (Ceia)", focus: "Garantia de Sono Seguro", items: ["120g de Maizena diluída em água"] }
+        { id: 1, time: "06:15", type: "water", name: "O Despertar", focus: "Ligar Filtro Renal", items: ["Beber 500ml de água imediatamente."] },
+        { id: 2, time: "07:30 - 07:45", type: "meal", name: "Café da Manhã & Café 1", focus: "Nutrição & Ignição", items: ["Alternar receitas (Ver aba RECEITAS)", "1 xícara pequena de café expresso ou coado forte."] },
+        { id: 3, time: "08:00", type: "protocol", name: "Protocolo Clínico I", focus: "Estabilidade Glicêmica", items: ["75g de Maizena (Amido de Milho cru) diluída em água"] },
+        { id: 4, time: "10:30", type: "meal", name: "Café 2 (Gotejamento)", focus: "Atenção sem pico", items: ["1 xícara pequena de café", "Meta hídrica: Garrafa 1 finalizada (Total 1.5L)"] },
+        { id: 5, time: "11:30 - 12:30", type: "meal", name: "Almoço", focus: "Construção Muscular & Fibras", items: ["200g Peito de Frango, Tilápia ou Carne Magra", "Salada Verde Escura à vontade", "Repolho Roxo cru (Vitamina C) + Cheiro Verde (Salsa)", "Meio limão espremido + 1 colher de sopa de Azeite Extra Virgem", "Pós-almoço: 1 xícara pequena de café (Café 3)"] },
+        { id: 6, time: "15:30", type: "meal", name: "Café 4 (Último do Dia)", focus: "Evitar Insônia", items: ["Última xícara de café. Absolutamente proibido cafeína após as 16h."] },
+        { id: 7, time: "16:00", type: "protocol", name: "Protocolo Clínico II + Anabolismo", focus: "Energia Pós-Turno 1", items: ["75g de Maizena diluída em água", "1 Scoop (30g) de Whey Protein Isolado (Adoçado s/ frutose)"] },
+        { id: 8, time: "17:00 - 18:00", type: "meal", name: "Jantar Estratégico", focus: "Transição de Trabalho", items: ["150g a 200g Carne magra (lombo, frango)", "Vagem e Abobrinha temperadas com Cúrcuma e Pimenta-do-reino"] },
+        { id: 9, time: "20:00", type: "protocol", name: "Protocolo Clínico III", focus: "Combustível para a Forja", items: ["75g de Maizena diluída em água. (Pausa no trabalho para tomar)."] },
+        { id: 10, time: "22:15 - 23:00", type: "workout", name: "Treino (A Forja)", focus: "Volume Hídrico", items: ["Meta: Secar 1 Garrafa de água inteira durante o treino."] },
+        { id: 11, time: "23:25", type: "meal", name: "Chegada em Casa (Opcional)", focus: "SOS Fome Noturna", items: ["Se houver fome, usar um Coringa de Volume (Ver aba RECEITAS)", "Preparo das marmitas do dia seguinte."] },
+        { id: 12, time: "00:00", type: "protocol", name: "Protocolo Clínico IV (Ceia)", focus: "Garantia de Sono Seguro", items: ["120g de Maizena diluída em água. Deitar logo após."] }
       ];
 
       return (
         <main className="max-w-4xl mx-auto p-4 mt-2 md:mt-6 animate-fade-in-up pb-10">
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div className="bg-red-900/10 border border-red-500/20 rounded-xl p-4 flex gap-3 items-start">
-              <AlertTriangle className="text-red-500 shrink-0 mt-0.5" size={20} />
+            <div className="bg-alert/10 border border-alert/20 rounded-xl p-4 flex gap-3 items-start">
+              <AlertTriangle className="text-alert shrink-0 mt-0.5" size={20} />
               <div>
-                <h3 className="text-red-500 font-bold text-xs uppercase mb-1">Risco Von Gierke</h3>
-                <p className="text-xs text-main opacity-80 leading-relaxed font-medium">Zero frutas, frutose ou sacarose. Vegetais e pimentão para vitamina C. Fígado blindado.</p>
+                <h3 className="text-alert font-bold text-xs uppercase mb-1">Risco Von Gierke</h3>
+                <p className="text-xs text-main opacity-80 leading-relaxed font-medium">Zero leite animal, zero frutas, zero sacarose. Laticínios tradicionais = Crise de Ácido Úrico.</p>
               </div>
             </div>
-            <div className="bg-blue-900/10 border border-blue-500/20 rounded-xl p-4 flex gap-3 items-start">
-              <Droplet className="text-blue-500 shrink-0 mt-0.5" size={20} />
+            <div className="bg-protocol/10 border border-protocol/20 rounded-xl p-4 flex gap-3 items-start">
+              <Droplet className="text-protocol shrink-0 mt-0.5" size={20} />
               <div>
-                <h3 className="text-blue-500 font-bold text-xs uppercase mb-1">Hematócrito & Rins</h3>
-                <p className="text-xs text-main opacity-80 leading-relaxed font-medium">Beber de 4 a 5 litros de água por dia é a regra de ouro para dissolver cristais e afinar o sangue.</p>
+                <h3 className="text-protocol font-bold text-xs uppercase mb-1">Sangue Espesso (Hematócrito 53%)</h3>
+                <p className="text-xs text-main opacity-80 leading-relaxed font-medium">Meta inegociável: 5 Garrafas de 1L/dia. Use a estratégia de gotejamento na sua mesa de trabalho.</p>
               </div>
             </div>
           </div>
@@ -530,28 +427,39 @@
                 <div key={meal.id} className="relative flex flex-col md:flex-row gap-3 md:gap-6 items-start group">
                   <div className="flex items-center gap-3 md:w-32 shrink-0 relative z-10">
                     <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center border shadow-lg transition-transform group-hover:scale-105 ${
-                      meal.type === 'protocol' ? 'bg-protocol/10 border-protocol/30 text-protocol' : 'bg-card border-brand/30 text-brand'
+                      meal.type === 'protocol' ? 'bg-protocol/10 border-protocol/30 text-protocol' : 
+                      meal.type === 'water' ? 'bg-blue-400/10 border-blue-400/30 text-blue-400' :
+                      meal.type === 'workout' ? 'bg-orange-500/10 border-orange-500/30 text-orange-500' :
+                      'bg-card border-brand/30 text-brand'
                     }`}>
-                      {meal.type === 'protocol' ? <Shield size={20} /> : <Coffee size={20} />}
+                      {meal.type === 'protocol' ? <Shield size={20} /> : 
+                       meal.type === 'water' ? <Droplet size={20} /> :
+                       meal.type === 'workout' ? <Flame size={20} /> :
+                       <Coffee size={20} />}
                     </div>
                     <div className="md:hidden font-mono font-bold text-base text-main">{meal.time}</div>
                   </div>
                   <div className={`flex-1 w-full bg-card border rounded-2xl p-4 md:p-5 shadow-sm relative overflow-hidden transition-colors ${
-                    meal.type === 'protocol' ? 'border-protocol/30 hover:border-protocol/50' : 'border-border hover:border-brand/50'
+                    meal.type === 'protocol' ? 'border-protocol/30 hover:border-protocol/50' : 
+                    meal.type === 'water' ? 'border-blue-400/30 hover:border-blue-400/50' : 
+                    meal.type === 'workout' ? 'border-orange-500/30 hover:border-orange-500/50' : 
+                    'border-border hover:border-brand/50'
                   }`}>
-                    <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-10 pointer-events-none transition-colors duration-300 ${
-                      meal.type === 'protocol' ? 'bg-protocol' : 'bg-brand'
-                    }`}></div>
                     <div className="relative z-10">
                       <div className="flex justify-between items-start mb-1">
                         <h2 className="text-lg md:text-xl font-bold text-main tracking-tight">{meal.name}</h2>
                         <span className="hidden md:block font-mono font-bold text-muted bg-dark px-2 py-1 rounded border border-border text-xs shadow-inner">{meal.time}</span>
                       </div>
-                      <p className={`text-[11px] md:text-xs font-bold mb-4 uppercase ${meal.type === 'protocol' ? 'text-protocol' : 'text-brand'}`}>Foco: {meal.focus}</p>
+                      <p className={`text-[11px] md:text-xs font-bold mb-4 uppercase ${
+                        meal.type === 'protocol' ? 'text-protocol' : 
+                        meal.type === 'water' ? 'text-blue-400' : 
+                        meal.type === 'workout' ? 'text-orange-500' : 
+                        'text-brand'
+                      }`}>Foco: {meal.focus}</p>
                       <ul className="space-y-2">
                         {meal.items.map((item, i) => (
                           <li key={i} className="flex gap-2 text-xs md:text-sm text-main font-medium leading-snug opacity-90">
-                            <span className={`shrink-0 mt-0.5 ${meal.type === 'protocol' ? 'text-protocol' : 'text-muted'}`}>•</span>
+                            <span className={`shrink-0 mt-0.5 ${meal.type === 'protocol' ? 'text-protocol' : meal.type === 'water' ? 'text-blue-400' : meal.type === 'workout' ? 'text-orange-500' : 'text-muted'}`}>•</span>
                             <span dangerouslySetInnerHTML={{ __html: item.replace(/\(([^)]+)\)/g, '<span class="text-muted text-[10px] md:text-xs">($1)</span>') }} />
                           </li>
                         ))}
@@ -561,6 +469,90 @@
                 </div>
               ))}
             </div>
+          </div>
+        </main>
+      );
+    };
+
+    const ReceitasView = () => {
+      const recipes = [
+        {
+          id: 'pate', type: 'breakfast', title: 'Patê de Frango Anabólico', kcal: '~ 180 kcal',
+          desc: 'Rico em gorduras monoinsaturadas (abacate) para proteção do HDL sob uso de testosterona.',
+          ingredients: ["150g a 200g de Peito de Frango desfiado temperado", "2 a 3 colheres de sopa de Abacate amassado", "Meio limão, sal e pimenta-do-reino", "1 colher de chá de mostarda amarela (opcional)", "Acompanhamento: 3 a 4 Biscoitos de Arroz Integral ou pepino em barcas"],
+          prep: ["Em uma tigela, amasse o abacate com um garfo até virar um creme.", "Incorpore o frango desfiado, o limão, a mostarda e os temperos.", "Misture vigorosamente até atingir textura de maionese.", "Sirva imediatamente sobre os biscoitos de arroz."]
+        },
+        {
+          id: 'leite', type: 'breakfast', title: 'Leite de Amendoim Caseiro', kcal: '~ 60 kcal / 100ml',
+          desc: 'A alternativa definitiva e segura contra a galactose do leite "Zero Lactose" do mercado.',
+          ingredients: ["1 xícara de amendoim torrado e sem pele (sem sal)", "1 Litro de água filtrada", "1 scoop (30g) de Whey Protein Isolado (adicionado na hora do consumo)", "1 colher de sopa de sementes de Chia (adicionado na hora)"],
+          prep: ["Deixe o amendoim de molho em água de 8 a 12 horas.", "Descarte a água do molho e lave os amendoins.", "Bata no liquidificador os amendoins com 1 Litro de água filtrada fresca por 3 min.", "Coe o líquido usando um pano limpo (voal) ou peneira bem fina.", "Guarde o líquido (leite) na geladeira. Na hora de beber, misture 250ml com o Whey e a Chia."]
+        },
+        {
+          id: 'ovos', type: 'breakfast', title: 'Ovos com Espinafre', kcal: '~ 220 kcal',
+          desc: 'Clássico nutritivo. Alta saciedade e zero impacto hepático com frutose/galactose.',
+          ingredients: ["3 Ovos inteiros", "Um punhado de Espinafre fresco ou congelado", "Sal e pimenta a gosto"],
+          prep: ["Em uma frigideira antiaderente, refogue rapidamente o espinafre.", "Adicione os ovos e mexa em fogo baixo até a textura desejada."]
+        },
+        {
+          id: 'sos1', type: 'sos', title: 'SOS Fome: O Engana-Estômago', kcal: '~ 30 kcal',
+          desc: 'Hack de volume máximo e crocância para desligar o hormônio da fome pós-treino (23h30).',
+          ingredients: ["1 a 2 Pepinos inteiros ou Cenouras", "Suco de 1 limão", "Sal e Pimenta-do-reino abundante"],
+          prep: ["Corte os legumes em formato de palito (batata frita).", "Tempere de forma generosa com o limão e o sal.", "Mastigue lentamente acompanhado do protocolo final de Maizena."]
+        },
+        {
+          id: 'sos2', type: 'sos', title: 'SOS Fome: Proteína Fantasma', kcal: '~ 85 kcal',
+          desc: 'Se a fome pedir algo quente. Zero gordura, zero carboidrato, zero purinas.',
+          ingredients: ["4 a 5 Claras de Ovo (descarte as gemas)", "Tempero verde e sal"],
+          prep: ["Bata as claras com um garfo.", "Despeje em frigideira quente antiaderente (sem óleo).", "Faça uma omelete ou mexido rápido."]
+        },
+        {
+          id: 'sos3', type: 'sos', title: 'SOS Fome: Doce de Volume', kcal: '~ 10 kcal',
+          desc: 'Adoçado com sucralose, sem sacarose/frutose. Pode comer a travessa inteira sem culpa.',
+          ingredients: ["1 pacote de Gelatina Diet / Zero Açúcar (sabor preferido)", "Água quente e gelada"],
+          prep: ["Prepare conforme a embalagem e deixe na geladeira pronta para a semana.", "Ataque quando a vontade de doce noturna for insuportável."]
+        }
+      ];
+
+      return (
+        <main className="max-w-7xl mx-auto p-4 mt-2 md:mt-6 animate-fade-in-up pb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {recipes.map(r => (
+              <div key={r.id} className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:border-brand/50 transition-colors duration-300 flex flex-col relative group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-2xl group-hover:bg-brand/10 transition-all pointer-events-none"></div>
+                <div className={`p-4 border-b border-border ${r.type === 'sos' ? 'bg-orange-500/10 border-orange-500/20' : 'bg-dark'}`}>
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-bold text-main text-lg leading-tight">{r.title}</h3>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${r.type === 'sos' ? 'bg-orange-500/20 text-orange-500' : 'bg-brand/20 text-brand'}`}>
+                    {r.kcal}
+                  </span>
+                </div>
+                <div className="p-5 flex-1 z-10 relative">
+                  <p className="text-xs text-muted mb-5 leading-relaxed font-medium">{r.desc}</p>
+                  
+                  <h4 className="text-xs font-bold text-main mb-3 uppercase tracking-wider">Ingredientes</h4>
+                  <ul className="space-y-2 mb-6">
+                    {r.ingredients.map((ing, i) => (
+                      <li key={i} className="flex gap-2 text-xs md:text-sm text-main font-medium leading-snug opacity-90">
+                        <span className="shrink-0 mt-0.5 text-muted">•</span>
+                        {ing}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <h4 className="text-xs font-bold text-main mb-3 uppercase tracking-wider pt-4 border-t border-border">Preparo</h4>
+                  <ol className="space-y-3">
+                    {r.prep.map((step, i) => (
+                      <li key={i} className="flex gap-3 text-xs md:text-sm text-main font-medium leading-snug opacity-90">
+                        <span className="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-dark border border-border text-[10px] text-muted font-bold">{i + 1}</span>
+                        <span className="mt-0.5">{step}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              </div>
+            ))}
           </div>
         </main>
       );
